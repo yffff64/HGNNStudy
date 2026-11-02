@@ -1,0 +1,125 @@
+default:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 128
+  epochs: 100
+  dropout: 0.5
+  lr: 1.0e-3
+  wd: 0.0
+
+  hyperG_norm: false
+  hid_dim: 128
+  M: 5
+  Mlst: 
+    - 3
+  combine: "concat"
+
+cora:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 128
+  epochs: 80
+  dropout: 0.5
+  lr: 1.0e-2
+  wd: 0.0
+  aggr_mode: 'max'
+  display_step: 10
+
+  hyperG_norm: false
+  hid_dim: 128
+  M: 5
+  Mlst: 
+    - 5
+  combine: "concat"
+
+pubmed:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 256
+  epochs: 60
+  dropout: 0.5
+  lr: 1.0e-2
+  wd: 0.0
+  aggr_mode: 'max'
+  display_step: 10
+
+  hyperG_norm: false
+  hid_dim: 256
+  M: 5
+  Mlst: 
+    - 5
+  combine: "concat"
+
+coauthor_cora:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 256
+  epochs: 60
+  dropout: 0.5
+  lr: 1.0e-2
+  wd: 0.0
+  aggr_mode: 'max'
+  display_step: 10
+
+  hyperG_norm: false
+  hid_dim: 256
+  M: 5
+  Mlst: 
+    - 5
+  combine: "concat"
+
+coauthor_dblp:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 256
+  epochs: 40
+  dropout: 0.5
+  lr: 1.0e-2
+  wd: 0.0
+  aggr_mode: 'max'
+  display_step: 10
+
+  hyperG_norm: false
+  hid_dim: 128
+  M: 5
+  Mlst: 
+    - 5
+  combine: "concat"
+
+actor:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 256
+  epochs: 50
+  dropout: 0.5
+  lr: 1.0e-2
+  wd: 0.0
+  aggr_mode: 'max'
+  display_step: 10
+
+  hyperG_norm: false
+  hid_dim: 256
+  M: 5
+  Mlst: 
+    - 5
+  combine: "concat"
+
+pokec:
+  All_num_layers: 1
+  embedding_hidden: 128
+  MLP_hidden: 256
+  epochs: 80
+  dropout: 0.5
+  lr: 1.0e-2
+  wd: 0.0
+  aggr_mode: 'max'
+  display_step: 1
+
+  hyperG_norm: false
+  hid_dim: 256
+  M: 5
+  Mlst: 
+    - 5
+  combine: "concat"
+
+

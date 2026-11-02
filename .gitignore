@@ -1,0 +1,41 @@
+# ===== 数据与压缩包（体积大，不入库；按 README 说明下载后放到 data/ 下）=====
+/data/
+*.zip
+*.tar.gz
+*.7z
+
+# ===== Python 缓存与编译产物 =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ===== 虚拟环境 =====
+venv/
+env/
+.venv/
+
+# ===== IDE / 编辑器 =====
+.idea/
+*.swp
+*.swo
+
+# ===== 运行时生成的缓存（EHNN 等，运行时自动重建）=====
+dhgbench/lib_ehnn_cache/*.pt
+
+# ===== 批量运行与本机环境验证日志 =====
+batch_logs/
+verify_out.txt
+depcheck.txt
+
+# ===== 系统文件 =====
+Thumbs.db
+desktop.ini
+.DS_Store
