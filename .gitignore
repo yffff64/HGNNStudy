@@ -30,6 +30,9 @@ env/
 # ===== 运行时生成的缓存（EHNN 等，运行时自动重建）=====
 dhgbench/lib_ehnn_cache/*.pt
 
+# ===== 日志文件 =====
+*.log
+
 # ===== 批量运行与本机环境验证日志 =====
 batch_logs/
 verify_out.txt
