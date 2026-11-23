@@ -25,6 +25,12 @@ These notes document my study of DHG-Bench\cite{li2026dhg}.
 % Create and complete the tables corresponding to Table 1 and Table A5.
 % Add the relevant \cite{...} after each method name.
 \textbf{Experimental setup:} All node-classification experiments are run on a single RTX 2080 Ti (22,GB) with Python 3.10 and PyTorch 2.6 (CUDA 12.4). Following the benchmark protocol, we use 5 random seeds, the default train/validation/test split (50\%/25\%/25\%), and the released per-dataset hyper-parameters from the official YAML configurations (i.e., the default setting \texttt{--is\_default=False}, which reads the dataset-specific tuning section rather than the global default section). Some large-dataset combinations fail due to GPU or CPU out-of-memory on a single 22,GB card; these are marked OOM in the tables below.
+
+\smallskip\noindent\textbf{Failure mechanisms.} In these notes, every failed run is labelled with one of four mechanisms:
+(i)~\textit{paper OOM}—the combination is already reported as out-of-memory in the benchmark and likewise cannot fit here;
+(ii)~\textit{local GPU OOM}—the benchmark reports a score, but the run exhausts the 22\,GB GPU memory;
+(iii)~\textit{missing section}—the per-dataset YAML section is missing and the run aborts with \texttt{AttributeError};
+(iv)~\textit{host-memory OOM}—preprocessing exceeds the available CPU memory.
 \begin{table}[H]
 	\centering\small
 	\begin{tabular}{llccc}
