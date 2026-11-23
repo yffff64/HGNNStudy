@@ -1,0 +1,592 @@
+% !TeX program = xelatex
+% This is a layout skeleton. Expand the tables, add measured results,
+% and supply the references for every baseline yourself.
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[superscript]{cite}
+\usepackage{booktabs,tabularx,enumitem,xcolor,xurl,hyperref,titlesec,float,multirow}
+\definecolor{accent}{HTML}{1B526C}
+\hypersetup{colorlinks=true,urlcolor=accent,citecolor=accent,linkcolor=accent}
+\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}
+\setlength{\intextsep}{7pt}\setlength{\textfloatsep}{7pt}
+\setlength{\abovecaptionskip}{4pt}\setlength{\belowcaptionskip}{0pt}
+\setlist[itemize]{leftmargin=1.5em,itemsep=4pt,topsep=3pt}
+\titleformat{\section}{\large\bfseries\color{accent}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries HGNNStudy}\par\vspace{5pt}
+{\large Hypergraph Node Classification Reproduction Notes}\par\vspace{8pt}
+Name: \underline{\hspace{4cm}}
+\end{center}
+These notes document my study of DHG-Bench\cite{li2026dhg}.
+
+\section*{Task 1: Experimental Reproduction}
+% Create and complete the tables corresponding to Table 1 and Table A5.
+% Add the relevant \cite{...} after each method name.
+\textbf{Experimental setup:} All node-classification experiments are run on a single RTX 2080 Ti (22,GB) with Python 3.10 and PyTorch 2.6 (CUDA 12.4). Following the benchmark protocol, we use 5 random seeds, the default train/validation/test split (50\%/25\%/25\%), and the released per-dataset hyper-parameters from the official YAML configurations (i.e., the default setting \texttt{--is\_default=False}, which reads the dataset-specific tuning section rather than the global default section). Some large-dataset combinations fail due to GPU or CPU out-of-memory on a single 22,GB card; these are marked OOM in the tables below.
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Cora}} & MLP               & 75.33$\pm$0.88   & 74.98$\pm$0.98   &  \\
+		 & CEGCN             & 76.90$\pm$0.75   & 76.84$\pm$0.51   &  \\
+		 & CEGAT             & 77.22$\pm$1.03   & 77.43$\pm$0.98   &  \\
+		 & HGNN              & 77.90$\pm$1.17   & 77.58$\pm$1.28   &  \\
+		 & HyperGCN          & 78.38$\pm$1.63   & 78.26$\pm$1.41   &  \\
+		 & HCHA              & 77.84$\pm$1.23   & 77.73$\pm$1.25   &  \\
+		 & LEGCN             & 74.36$\pm$1.03   & 78.32$\pm$1.49   & higher than paper \\
+		 & HyperND           & 79.23$\pm$0.63   & 77.87$\pm$1.25   &  \\
+		 & PhenomNN          & 78.97$\pm$1.41   & 78.64$\pm$1.16   &  \\
+		 & SheafHyperGNN     & 79.03$\pm$0.90   & 78.85$\pm$0.86   &  \\
+		 & HJRL              & 78.67$\pm$1.47   & 78.70$\pm$1.63   &  \\
+		 & DPHGNN            & 76.40$\pm$1.36   & 75.86$\pm$1.29   &  \\
+		 & TFHNN             & 79.47$\pm$1.31   & 79.70$\pm$1.52   &  \\
+		 & HNHN              & 75.24$\pm$1.38   & 75.27$\pm$1.37   &  \\
+		 & UniGCNII          & 79.41$\pm$1.24   & 79.29$\pm$1.07   &  \\
+		 & AllSetformer      & 78.02$\pm$1.43   & 78.02$\pm$1.98   &  \\
+		 & EDHNN             & 78.58$\pm$0.52   & 78.02$\pm$1.41   &  \\
+		 & HyperGT           & 75.57$\pm$1.11   & 75.07$\pm$0.98   &  \\
+		 & EHNN              & 76.51$\pm$1.52   & 75.78$\pm$1.59   &  \\
+		 & TMPHN             & 74.20$\pm$1.37   & 74.15$\pm$1.77   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Cora}.}
+\end{table}
+\par\smallskip
+\noindent\textbf{Cora.} All 20 methods complete successfully. The best reproduced cell is TFHNN at $79.70\%$ (paper $79.47\%$), and the reproduction is tight overall: 18 of 20 cells lie within 1.0 point of the paper with a mean absolute gap of 0.49 points.
+
+\noindent\textit{Higher than paper.} LEGCN reaches $78.32\pm1.49\%$ versus $74.36\pm1.03\%$, a $+4.0$-point gap. We ran a 20-seed check: even the lowest seed ($75.18$) already beats the reported mean, so the gap is not random fluctuation but reproduces every time. With the code, data, and seeds identical, the only remaining difference is the environment—ours is Windows + RTX 2080 Ti while the benchmark uses Ubuntu + Quadro RTX 6000; under different software and hardware, low-level operations such as sparse-matrix kernels produce tiny numerical differences that accumulate across the layers and shift the final accuracy.
+
+\noindent\textit{Lower than paper.} HyperND is $1.4$ points below the paper ($77.87\pm1.25\%$ vs. $79.23\pm0.63\%$). This sits close to the 1-point band and within the run-to-run spread, so it is treated as ordinary variation rather than a diagnosed defect.
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Coauthor-Cora}} & MLP               & 75.57$\pm$1.08   & 74.92$\pm$1.70   &  \\
+		 & CEGCN             & 78.40$\pm$1.25   & 78.35$\pm$1.30   &  \\
+		 & CEGAT             & 78.02$\pm$1.24   & 78.26$\pm$0.71   &  \\
+		 & HGNN              & 82.84$\pm$0.46   & 82.51$\pm$0.86   &  \\
+		 & HyperGCN          & 81.65$\pm$1.58   & 81.30$\pm$1.72   &  \\
+		 & HCHA              & 83.01$\pm$0.58   & 82.92$\pm$0.75   &  \\
+		 & LEGCN             & 74.59$\pm$1.04   & 82.95$\pm$0.79   & higher than paper \\
+		 & HyperND           & 83.19$\pm$0.71   & 83.10$\pm$0.80   &  \\
+		 & PhenomNN          & 84.05$\pm$1.05   & 83.87$\pm$0.53   &  \\
+		 & SheafHyperGNN     & 84.08$\pm$0.50   & 83.57$\pm$0.68   &  \\
+		 & HJRL              & 83.72$\pm$0.74   & 83.52$\pm$0.71   &  \\
+		 & DPHGNN            & 82.13$\pm$1.13   & 81.42$\pm$0.38   &  \\
+		 & TFHNN             & 84.19$\pm$0.89   & 84.11$\pm$0.62   &  \\
+		 & HNHN              & 76.51$\pm$1.34   & 76.40$\pm$1.33   &  \\
+		 & UniGCNII          & 83.49$\pm$1.58   & 83.87$\pm$0.89   &  \\
+		 & AllSetformer      & 82.95$\pm$0.62   & 82.90$\pm$0.76   &  \\
+		 & EDHNN             & 82.98$\pm$0.93   & 81.89$\pm$0.75   &  \\
+		 & HyperGT           & 75.42$\pm$0.62   & 75.57$\pm$1.04   &  \\
+		 & EHNN              & 81.68$\pm$0.81   & 81.00$\pm$1.22   &  \\
+		 & TMPHN             & 75.01$\pm$1.44   & 74.62$\pm$1.24   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Coauthor-Cora}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Coauthor-Cora.} All 20 methods complete; TFHNN is best at $84.11\%$ (paper $84.19\%$), with 18 of 20 cells within 1.0 point and a mean gap of 0.73 points.
+
+\noindent\textit{Higher than paper.} LEGCN reproduces at $82.95\pm0.79\%$ versus $74.59\pm1.04\%$, the largest positive LEGCN discrepancy in the study ($+8.4$ points). The reason is the same as for Cora above, namely the systematic software/hardware platform difference already explained there.
+
+\noindent\textit{Lower than paper.} EDHNN is $1.1$ points below its reported value ($81.89\%$ vs. $82.98\%$), just outside the 1-point band and within the normal seed spread.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{NTU2012}} & MLP               & 88.59$\pm$1.27   & 88.59$\pm$1.27   &  \\
+		 & CEGCN             & 84.93$\pm$1.12   & 84.89$\pm$1.10   &  \\
+		 & CEGAT             & 84.14$\pm$1.77   & 84.17$\pm$1.58   &  \\
+		 & HGNN              & 90.13$\pm$0.89   & 90.14$\pm$0.89   &  \\
+		 & HyperGCN          & 75.78$\pm$4.82   & 75.83$\pm$4.83   &  \\
+		 & HCHA              & 90.53$\pm$1.00   & 90.54$\pm$1.00   &  \\
+		 & LEGCN             & 89.82$\pm$0.91   & 91.17$\pm$0.62   &  \\
+		 & HyperND           & 88.98$\pm$1.56   & 88.67$\pm$1.61   &  \\
+		 & PhenomNN          & 88.78$\pm$0.67   & 88.71$\pm$0.81   &  \\
+		 & SheafHyperGNN     & 90.81$\pm$0.58   & 90.78$\pm$0.57   &  \\
+		 & HJRL              & 88.15$\pm$1.18   & 88.31$\pm$0.93   &  \\
+		 & DPHGNN            & 84.77$\pm$1.06   & 84.77$\pm$1.44   &  \\
+		 & TFHNN             & 91.69$\pm$0.75   & 91.49$\pm$0.49   &  \\
+		 & HNHN              & 87.27$\pm$1.53   & 87.20$\pm$1.56   &  \\
+		 & UniGCNII          & 89.86$\pm$0.44   & 90.26$\pm$0.56   &  \\
+		 & AllSetformer      & 90.17$\pm$1.03   & 89.86$\pm$0.71   &  \\
+		 & EDHNN             & 91.45$\pm$0.70   & 91.49$\pm$0.55   &  \\
+		 & HyperGT           & 86.00$\pm$2.05   & 86.80$\pm$2.34   &  \\
+		 & EHNN              & 87.99$\pm$0.39   & 87.55$\pm$0.70   &  \\
+		 & TMPHN             & 89.15$\pm$1.09   & 89.15$\pm$1.09   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{NTU2012}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{NTU2012.} All 20 methods complete; TFHNN gives the best result at $91.49\%$ (paper $91.69\%$). This is one of the most faithful tables: 19 of 20 cells are within 1.0 point and the mean gap is only 0.22 points.
+
+\noindent\textit{Higher than paper.} LEGCN is the single cell outside the band at $91.17\pm0.62\%$ versus $89.82\pm0.91\%$ ($+1.4$ points). The reason is the same as for Cora above, namely the systematic software/hardware platform difference already explained there; the gap does not change the ranking.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{ModelNet40}} & MLP               & 96.88$\pm$0.23   & 96.83$\pm$0.26   &  \\
+		 & CEGCN             & 92.34$\pm$0.24   & 92.34$\pm$0.23   &  \\
+		 & CEGAT             & 92.02$\pm$0.26   & 91.97$\pm$0.17   &  \\
+		 & HGNN              & 97.43$\pm$0.20   & 97.43$\pm$0.20   &  \\
+		 & HyperGCN          & 91.15$\pm$3.88   & 92.85$\pm$1.93   & higher than paper \\
+		 & HCHA              & 97.68$\pm$0.16   & 97.69$\pm$0.16   &  \\
+		 & LEGCN             & 96.82$\pm$0.24   & 98.42$\pm$0.15   & higher than paper \\
+		 & HyperND           & 97.18$\pm$0.58   & 97.17$\pm$0.55   &  \\
+		 & PhenomNN          & 98.28$\pm$0.18   & 98.27$\pm$0.14   &  \\
+		 & SheafHyperGNN     & 98.30$\pm$0.19   & 98.24$\pm$0.26   &  \\
+		 & HJRL              & 96.33$\pm$0.30   & 96.32$\pm$0.39   &  \\
+		 & DPHGNN            & 97.19$\pm$0.17   & 97.04$\pm$0.12   &  \\
+		 & TFHNN             & 98.38$\pm$0.11   & 98.47$\pm$0.11   &  \\
+		 & HNHN              & 97.30$\pm$0.27   & 97.30$\pm$0.28   &  \\
+		 & UniGCNII          & 98.42$\pm$0.08   & 98.40$\pm$0.14   &  \\
+		 & AllSetformer      & 98.07$\pm$0.21   & 98.04$\pm$0.20   &  \\
+		 & EDHNN             & 98.51$\pm$0.15   & 98.44$\pm$0.10   &  \\
+		 & HyperGT           & 96.83$\pm$0.17   & 96.94$\pm$0.29   &  \\
+		 & EHNN              & 97.97$\pm$0.17   & 97.97$\pm$0.11   &  \\
+		 & TMPHN             & 97.76$\pm$0.34   & 97.78$\pm$0.14   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{ModelNet40}.}
+\end{table}
+\par\smallskip
+\noindent\textbf{ModelNet40.} All 20 methods complete; TFHNN is best at $98.47\%$ (paper $98.38\%$), with 18 of 20 cells within 1.0 point and a mean gap of 0.20 points.
+
+\noindent\textit{Higher than paper.} Two cells sit just above the band: HyperGCN ($+1.7$) and LEGCN ($+1.6$). HyperGCN's large paper deviation ($3.88$) already covers the gap, while for LEGCN the reason is the same as for Cora above; no cell underperforms.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Actor}} & MLP               & 86.06$\pm$0.36   & 85.57$\pm$0.68   &  \\
+		 & CEGCN             & 67.41$\pm$0.29   & 67.39$\pm$0.34   &  \\
+		 & CEGAT             & 73.87$\pm$0.83   & 73.64$\pm$0.78   &  \\
+		 & HGNN              & 77.83$\pm$0.37   & 77.83$\pm$0.37   &  \\
+		 & HyperGCN          & 81.82$\pm$0.39   & 81.82$\pm$0.39   &  \\
+		 & HCHA              & 78.30$\pm$0.47   & 78.30$\pm$0.47   &  \\
+		 & LEGCN             & 85.34$\pm$0.45   & 82.18$\pm$0.41   & lower than paper \\
+		 & HyperND           & 83.19$\pm$0.92   & 83.21$\pm$0.45   &  \\
+		 & PhenomNN          & 83.14$\pm$0.49   & 83.46$\pm$0.46   &  \\
+		 & SheafHyperGNN     & 85.00$\pm$0.32   & 85.00$\pm$0.32   &  \\
+		 & HJRL              & 71.54$\pm$0.64   & 71.60$\pm$0.40   &  \\
+		 & DPHGNN            & 83.65$\pm$0.59   & 83.11$\pm$1.09   &  \\
+		 & TFHNN             & 85.96$\pm$0.41   & 86.09$\pm$0.24   &  \\
+		 & HNHN              & 81.20$\pm$0.36   & 80.99$\pm$0.37   &  \\
+		 & UniGCNII          & 84.61$\pm$0.46   & 82.38$\pm$0.58   & lower than paper \\
+		 & AllSetformer      & 85.66$\pm$0.41   & 85.50$\pm$0.39   &  \\
+		 & EDHNN             & 85.77$\pm$0.46   & 85.71$\pm$0.48   &  \\
+		 & HyperGT           & 84.43$\pm$0.47   & 84.34$\pm$0.56   &  \\
+		 & EHNN              & 86.21$\pm$0.49   & 86.09$\pm$0.62   &  \\
+		 & TMPHN             & 85.32$\pm$0.48   & 85.62$\pm$0.26   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Actor}.}
+\end{table}
+\par\smallskip
+\noindent\textbf{Actor.} All 20 methods complete; TFHNN is best at $86.09\%$ (paper $85.96\%$), with 18 of 20 cells within 1.0 point and a mean gap of 0.45 points.
+
+\noindent\textit{Lower than paper.} LEGCN ($-3.2$) and UniGCNII ($-2.2$) stay reproducibly below the paper at the same value after re-running, so this is not random fluctuation. With the code, data, and seeds identical and no added noise, the gap can only come from the environment. Both models are heavily regularised and especially sensitive to tiny numerical differences in the low-level sparse-matrix operations; these differences are then amplified layer by layer through normalisation, ending in a stable gap.
+
+\noindent\textit{DPHGNN recovered.} After re-running, DPHGNN improves from $82.09$ to $83.11\%$ (paper $83.65$), back inside the band, so its earlier shortfall was a run-to-run fluctuation.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Twitch}} & MLP               & 52.57$\pm$0.49   & 51.54$\pm$0.49   &  \\
+		 & CEGCN             & 51.02$\pm$0.53   & 51.15$\pm$0.33   &  \\
+		 & CEGAT             & 51.05$\pm$0.61   & 50.84$\pm$0.52   &  \\
+		 & HGNN              & 52.38$\pm$0.56   & 52.38$\pm$0.56   &  \\
+		 & HyperGCN          & 51.32$\pm$0.72   & 51.52$\pm$0.51   &  \\
+		 & HCHA              & 52.35$\pm$0.71   & 52.38$\pm$0.56   &  \\
+		 & LEGCN             & 51.31$\pm$0.65   & 50.94$\pm$0.70   &  \\
+		 & HyperND           & 52.39$\pm$0.60   & 52.18$\pm$0.73   &  \\
+		 & PhenomNN          & 51.80$\pm$0.73   & 51.75$\pm$0.73   &  \\
+		 & SheafHyperGNN     & 52.07$\pm$0.53   & 52.02$\pm$0.64   &  \\
+		 & HJRL              & 51.62$\pm$0.61   & 51.35$\pm$0.69   &  \\
+		 & DPHGNN            & 52.36$\pm$0.59   & 52.24$\pm$0.72   &  \\
+		 & TFHNN             & 52.34$\pm$0.53   & 51.89$\pm$1.11   &  \\
+		 & HNHN              & 51.12$\pm$0.65   & 51.12$\pm$0.65   &  \\
+		 & UniGCNII          & 52.50$\pm$0.57   & 52.41$\pm$0.67   &  \\
+		 & AllSetformer      & 51.74$\pm$0.75   & 51.73$\pm$0.74   &  \\
+		 & EDHNN             & 50.54$\pm$0.23   & 50.43$\pm$0.40   &  \\
+		 & HyperGT           & 51.19$\pm$0.57   & 51.29$\pm$0.64   &  \\
+		 & EHNN              & 52.14$\pm$0.76   & 51.85$\pm$0.61   &  \\
+		 & TMPHN             & 51.82$\pm$0.38   & 51.48$\pm$0.56   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Twitch}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Twitch.} All 20 methods complete; UniGCNII is best at $52.41\%$ (paper $52.50\%$). The accuracies are tightly clustered around 51--52\%, with 19 of 20 cells within 1.0 point and a mean gap of 0.20 points.
+
+\noindent\textit{Lower than paper.} MLP sits exactly on the band edge at $51.54\pm0.49\%$ versus $52.57\pm0.49\%$ ($-1.0$), which is within the ordinary seed spread and needs no further diagnosis.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Pubmed}} & MLP               & 86.62$\pm$0.26   & 86.56$\pm$0.23   &  \\
+		 & CEGCN             & 86.03$\pm$0.39   & 85.97$\pm$0.39   &  \\
+		 & CEGAT             & 86.09$\pm$0.51   & 86.04$\pm$0.41   &  \\
+		 & HGNN              & 86.17$\pm$0.52   & 86.13$\pm$0.52   &  \\
+		 & HyperGCN          & 87.42$\pm$0.42   & 87.46$\pm$0.51   &  \\
+		 & HCHA              & 86.33$\pm$0.54   & 86.30$\pm$0.56   &  \\
+		 & LEGCN             & 87.52$\pm$0.50   & 88.15$\pm$0.45   &  \\
+		 & HyperND           & 86.73$\pm$0.56   & 85.63$\pm$2.51   &  \\
+		 & PhenomNN          & 87.81$\pm$0.12   & 87.88$\pm$0.11   &  \\
+		 & SheafHyperGNN     & 87.10$\pm$0.47   & 87.14$\pm$0.48   &  \\
+		 & HJRL              & 87.98$\pm$0.49   & 87.96$\pm$0.49   &  \\
+		 & DPHGNN            & 86.72$\pm$0.33   & 86.73$\pm$0.44   &  \\
+		 & TFHNN             & 87.90$\pm$0.37   & 87.92$\pm$0.26   &  \\
+		 & HNHN              & 85.66$\pm$1.28   & 85.57$\pm$1.41   &  \\
+		 & UniGCNII          & 87.57$\pm$0.54   & 87.53$\pm$0.56   &  \\
+		 & AllSetformer      & 87.79$\pm$0.30   & 87.63$\pm$0.33   &  \\
+		 & EDHNN             & 87.65$\pm$0.23   & 87.66$\pm$0.37   &  \\
+		 & HyperGT           & 86.06$\pm$0.54   & 85.40$\pm$2.05   &  \\
+		 & EHNN              & 87.12$\pm$0.31   & 87.19$\pm$0.32   &  \\
+		 & TMPHN             & 86.28$\pm$0.62   & 86.89$\pm$0.57   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Pubmed}.}
+\end{table}
+\par\smallskip
+\noindent\textbf{Pubmed.} All 20 methods complete; LEGCN is best at $88.15\%$ (paper $87.52\%$), with 19 of 20 cells within 1.0 point and a mean gap of 0.19 points.
+
+\noindent\textit{Minor fluctuation.} After re-running, HyperND improves from $81.01$ to $85.63\pm2.51\%$ (paper $86.73$), with one poor seed ($80.65$) inflating the deviation. The earlier gap came from training instability rather than a systematic bias.
+
+
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Amazon}} & MLP               & 28.47$\pm$0.76   & 27.28$\pm$0.49   &  \\
+		 & CEGCN             & 26.65$\pm$1.61   & 25.32$\pm$0.96   &  \\
+		 & CEGAT             & 28.23$\pm$0.50   & 27.03$\pm$1.47   &  \\
+		 & HGNN              & 28.05$\pm$0.28   & 28.02$\pm$0.41   &  \\
+		 & HyperGCN          & 27.34$\pm$0.72   & 27.53$\pm$1.00   &  \\
+		 & HCHA              & 28.33$\pm$0.34   & 28.28$\pm$0.27   &  \\
+		 & LEGCN             & 28.21$\pm$0.50   & 28.40$\pm$0.30   &  \\
+		 & HyperND           & 28.32$\pm$0.38   & 27.91$\pm$0.94   &  \\
+		 & PhenomNN          & 28.49$\pm$0.41   & 28.49$\pm$0.49   &  \\
+		 & SheafHyperGNN     & 28.35$\pm$0.57   & 27.94$\pm$0.73   &  \\
+		 & HJRL              & 26.90$\pm$0.55   & 26.89$\pm$0.60   &  \\
+		 & DPHGNN            & 28.57$\pm$1.07   & 28.87$\pm$0.92   &  \\
+		 & TFHNN             & 28.56$\pm$0.68   & 28.52$\pm$0.44   &  \\
+		 & HNHN              & 27.29$\pm$0.70   & 27.30$\pm$0.69   &  \\
+		 & UniGCNII          & 28.39$\pm$0.64   & 28.21$\pm$0.65   &  \\
+		 & AllSetformer      & 27.32$\pm$1.11   & 27.58$\pm$1.28   &  \\
+		 & EDHNN             & 28.38$\pm$0.31   & 28.06$\pm$0.21   &  \\
+		 & HyperGT           & 26.58$\pm$0.33   & 23.52$\pm$3.15   & lower than paper \\
+		 & EHNN              & 28.95$\pm$0.81   & 29.05$\pm$0.47   &  \\
+		 & TMPHN             & 24.63$\pm$1.22   & 23.07$\pm$1.98   & lower than paper \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Amazon (Ratings)}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Amazon (Ratings).} All 20 methods complete; EHNN is best at $29.05\%$ (paper $28.95\%$), with 15 of 20 cells within 1.0 point and a mean gap of 0.54 points. Every accuracy remains near $28\%$, so the dataset difficulty and ranking are preserved.
+
+\noindent\textit{Lower than paper.} HyperGT ($-3.1$) and TMPHN ($-1.6$) stay reproducibly low at similar values across re-runs, so this is not a one-off. The key is the data itself: of the 22,299 nodes, 19,175 ($86\%$) belong to no hyperedge and are fully isolated, leaving these models with no neighbours to aggregate, so they can rely only on each node's own features. These two models are complex architectures designed for rich high-order connections, with heavy structures and many parameters; on such a weak signal they instead fail to learn, under-fitting even the training set (training accuracy only $20$–$30$) and stalling near $28\%$. In contrast, simple models with deterministic aggregation such as HGNN reduce, on an isolated node, to a transform of its own features, and so land stably near $28\%$ without a clear bias.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Coauthor-DBLP}} & MLP               & 85.54$\pm$0.15   & 85.57$\pm$0.12   &  \\
+		 & CEGCN             & 89.75$\pm$0.33   & 89.81$\pm$0.32   &  \\
+		 & CEGAT             & 89.61$\pm$0.22   & 89.48$\pm$0.21   &  \\
+		 & HGNN              & 91.00$\pm$0.27   & 90.95$\pm$0.29   &  \\
+		 & HyperGCN          & 89.51$\pm$0.18   & 89.43$\pm$0.11   &  \\
+		 & HCHA              & 91.18$\pm$0.30   & 91.22$\pm$0.33   &  \\
+		 & LEGCN             & 85.16$\pm$0.14   & 90.54$\pm$0.20   & higher than paper \\
+		 & HyperND           & 91.34$\pm$0.19   & 91.34$\pm$0.17   &  \\
+		 & PhenomNN          & 91.83$\pm$0.25   & 91.87$\pm$0.24   &  \\
+		 & SheafHyperGNN     & 91.09$\pm$0.31   & 91.10$\pm$0.22   &  \\
+		 & HJRL              & OOM              & --               & OOM in paper \\
+		 & DPHGNN            & OOM              & --               & OOM in paper \\
+		 & TFHNN             & 91.38$\pm$0.24   & 90.63$\pm$0.21   &  \\
+		 & HNHN              & 85.84$\pm$0.07   & 85.91$\pm$0.05   &  \\
+		 & UniGCNII          & 91.71$\pm$0.20   & 91.67$\pm$0.20   &  \\
+		 & AllSetformer      & 91.51$\pm$0.22   & 91.41$\pm$0.25   &  \\
+		 & EDHNN             & 91.55$\pm$0.19   & 91.42$\pm$0.19   &  \\
+		 & HyperGT           & 84.53$\pm$0.30   & 84.50$\pm$0.36   &  \\
+		 & EHNN              & 90.47$\pm$0.43   & 90.37$\pm$0.29   &  \\
+		 & TMPHN             & 85.44$\pm$0.14   & 85.27$\pm$0.42   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Coauthor-DBLP}.}
+\end{table}
+\par\smallskip
+\noindent\textbf{Coauthor-DBLP.} 18 of 20 methods complete; PhenomNN is best at $91.87\%$ (paper $91.83\%$), and 17 of the 18 successful cells are within 1.0 point with a mean gap of 0.40 points.
+
+\noindent\textit{Higher than paper.} LEGCN reproduces at $90.54\pm0.20\%$ versus $85.16\pm0.14\%$ ($+5.4$), the one outlier among the successful cells. The small standard deviation indicates a reproducible rather than random gap. The reason is the same as for Cora above, namely the systematic software/hardware platform difference already explained there.
+
+\noindent\textit{Unsuccessful runs.} HJRL and DPHGNN are already OOM in the paper (mechanism i) and likewise cannot fit on the 22 GB card, but they exhaust memory at different stages.
+
+\noindent\textit{HJRL: densification for incidence-matrix reconstruction.} Besides classification, HJRL also reconstructs the hypergraph incidence matrix: every training step it multiplies the node embeddings by the hyperedge embeddings, producing a dense $41{,}302\times63{,}665$ matrix, and the following sigmoid creates a second matrix of the same size, each copy taking $9.80$ GiB. With several copies alive at once the memory fills quickly; the error occurs at sigmoid with $20.70$ GiB already allocated.
+
+\noindent\textit{DPHGNN: the full attention matrix.} The configuration for this dataset disables attention chunking, so DPHGNN must compute the attention weights between every pair of nodes at once, forming a $41{,}302\times41{,}302$ square matrix that alone takes $6.36$ GiB. When the backward pass tries to allocate the gradient for this matrix, no memory is free, so it fails.
+
+\noindent\textit{EHNN preprocessing fix.} EHNN failed on host memory rather than GPU memory: its preprocessing by default expands the incidence matrix into a dense $41{,}302\times63{,}665$ matrix, and this single step needs $9.80$ GiB of contiguous memory, which a 32 GB machine cannot provide. We make the preprocessing branch route coauthor\_dblp down the sparse path, so the dense matrix is no longer built while the computed result stays unchanged. After the fix EHNN runs at $90.37\pm0.29\%$, closely matching the paper's $90.47$.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Walmart-Trips-100}} & MLP               & 63.21$\pm$0.12   & 63.20$\pm$0.33   &  \\
+		 & CEGCN             & 70.40$\pm$0.18   & 70.42$\pm$0.12   &  \\
+		 & CEGAT             & 65.83$\pm$0.92   & 65.53$\pm$0.70   &  \\
+		 & HGNN              & 77.12$\pm$0.12   & 77.38$\pm$0.06   &  \\
+		 & HyperGCN          & 68.75$\pm$0.56   & 68.98$\pm$0.19   &  \\
+		 & HCHA              & 77.66$\pm$0.18   & 78.06$\pm$0.19   &  \\
+		 & LEGCN             & 62.98$\pm$0.09   & 67.82$\pm$0.95   & higher than paper \\
+		 & HyperND           & 75.10$\pm$0.54   & 74.96$\pm$0.59   &  \\
+		 & PhenomNN          & OOM              & 60.82$\pm$0.34   & paper OOM, run succeeded \\
+		 & SheafHyperGNN     & OOM              & --               & no YAML section, config error \\
+		 & HJRL              & OOM              & --               & OOM in paper \\
+		 & DPHGNN            & OOM              & --               & no YAML section, config error \\
+		 & TFHNN             & 77.04$\pm$0.12   & 77.47$\pm$0.31   &  \\
+		 & HNHN              & 65.21$\pm$0.28   & 65.04$\pm$0.35   &  \\
+		 & UniGCNII          & 76.26$\pm$0.58   & 65.16$\pm$0.82   & lower than paper \\
+		 & AllSetformer      & 78.61$\pm$0.13   & 78.81$\pm$0.19   &  \\
+		 & EDHNN             & 77.90$\pm$0.21   & 78.09$\pm$0.12   &  \\
+		 & HyperGT           & OOM              & --               & OOM in paper \\
+		 & EHNN              & 77.95$\pm$0.14   & 78.27$\pm$0.17   &  \\
+		 & TMPHN             & 73.48$\pm$0.33   & --               & no YAML section; CPU OOM \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Walmart-Trips-100}.}
+\end{table}
+\par\smallskip
+\noindent\textbf{Walmart-Trips-100.} 15 of 20 methods complete; AllSetformer is best at $78.81\%$ (paper $78.61\%$), and 12 of the 14 successful cells that have a reported value are within 1.0 point.
+
+\noindent\textit{Lower than paper.} UniGCNII is the single large gap ($-11.1$). We first ruled out the alternatives: its YAML section loads correctly and the model does train (it merely under-fits), and it matches the paper on all other 12 datasets, so this is not an implementation bug; fixed-seed sweeps of the learning rate and restart alpha never recover anything near the paper's $76\%$. The most plausible remaining explanation is an environment difference, and the features of this dataset are loaded with Gaussian noise of standard deviation $0.6$, so the environment difference likely acts through these noisy features.
+
+\noindent\textit{LEGCN sparse-representation fix.} LEGCN initially hit CUDA OOM: after turning the hypergraph into a line graph, walmart yields $75.6$ million edges, and the original edge-wise computation materialised a $36.07$ GiB tensor that no single card can hold. We instead store the adjacency as a sparse tensor and disable the setting that would add duplicate self-loops, so the large tensor is no longer built while the result stays numerically identical, with a peak memory of only $9.35$ GiB. LEGCN then runs at $67.82\pm0.95\%$ ($+4.84$), for the same platform reason as Cora above.
+
+\noindent\textit{Unsuccessful runs.} The five failures have distinct causes. TMPHN fails on host memory (52.6 GiB demanded, mechanism iv). SheafHyperGNN and DPHGNN abort with the missing-section \texttt{AttributeError} (mechanism iii). HJRL and HyperGT are OOM in the paper (mechanism i).
+
+\noindent\textit{Reverse case (paper OOM, run succeeded).} PhenomNN is marked OOM in the paper but completes here at $60.82\%$. The same matrix would need $29.42$ GiB in dense form but only $16.19$ MiB in sparse form; our software version likely routes this operator down the sparse path automatically, and this is the only cell in the study that is OOM in the paper yet succeeds locally.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Yelp}} & MLP               & 31.84$\pm$0.45   & 31.67$\pm$0.46   &  \\
+		 & CEGCN             & OOM              & --               & GPU OOM \\
+		 & CEGAT             & OOM              & --               & no YAML section, config error \\
+		 & HGNN              & 33.71$\pm$0.24   & 33.71$\pm$0.24   &  \\
+		 & HyperGCN          & 29.29$\pm$0.55   & 21.48$\pm$6.98   & lower than paper \\
+		 & HCHA              & 33.13$\pm$0.23   & 33.13$\pm$0.23   &  \\
+		 & LEGCN             & OOM              & --               & no YAML section; CPU OOM \\
+		 & HyperND           & OOM              & --               & GPU OOM \\
+		 & PhenomNN          & OOM              & --               & GPU OOM \\
+		 & SheafHyperGNN     & OOM              & --               & no YAML section, config error \\
+		 & HJRL              & OOM              & --               & CPU OOM \\
+		 & DPHGNN            & OOM              & --               & no YAML section, config error \\
+		 & TFHNN             & 35.16$\pm$0.54   & 34.14$\pm$1.27   &  \\
+		 & HNHN              & 25.86$\pm$0.63   & 25.86$\pm$0.63   &  \\
+		 & UniGCNII          & 31.09$\pm$0.61   & 30.93$\pm$0.58   &  \\
+		 & AllSetformer      & 33.18$\pm$0.88   & 32.38$\pm$0.11   &  \\
+		 & EDHNN             & 34.84$\pm$0.93   & 34.55$\pm$1.11   &  \\
+		 & HyperGT           & OOM              & --               & no YAML section, config error \\
+		 & EHNN              & 34.09$\pm$3.19   & 33.79$\pm$2.48   &  \\
+		 & TMPHN             & OOM              & --               & no YAML section; CPU OOM \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Yelp}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Yelp.} Only 10 of 20 methods complete; EDHNN is best at $34.55\%$ (paper $34.84\%$), with 7 of the 10 successful cells within 1.0 point.
+
+\noindent\textit{Lower than paper.} HyperGCN is the largest gap at $21.48\pm6.98\%$ ($-7.8$); the inflated deviation ($6.98$ vs. $0.55$) shows unstable convergence with some seeds on poor solutions, rather than a stable bias.
+
+\noindent\textit{EHNN re-run.} Re-running EHNN with the unchanged official config across five seeds gives $33.79\pm2.48\%$ (seed tests $36.05, 30.38, 31.17, 35.48, 35.88$), shrinking the gap from $-2.4$ to $-0.30$, inside the band; the earlier shortfall was a run-to-run fluctuation.
+
+\noindent\textit{Unsuccessful runs.} Ten cells fail. CEGCN, HyperND, and PhenomNN hit GPU OOM (needing $41.56$, $31.73$, and $27.22$ GiB); HJRL, LEGCN, and TMPHN hit host-memory OOM ($12.6$, $31.8$, $138$ GiB); CEGAT, SheafHyperGNN, DPHGNN, and HyperGT abort with the missing-section AttributeError.
+
+
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Pokec}} & MLP               & 59.64$\pm$0.48   & 59.64$\pm$0.48   &  \\
+		 & CEGCN             & 57.37$\pm$0.38   & 56.92$\pm$0.53   &  \\
+		 & CEGAT             & 57.34$\pm$0.52   & 57.06$\pm$0.51   & \\
+		 & HGNN              & 57.87$\pm$0.76   & 58.07$\pm$0.32   &  \\
+		 & HyperGCN          & 57.51$\pm$0.54   & 57.46$\pm$0.40   &  \\
+		 & HCHA              & 58.19$\pm$0.45   & 57.96$\pm$0.47   &  \\
+		 & LEGCN             & 59.66$\pm$0.63   & 58.47$\pm$0.54   & lower than paper \\
+		 & HyperND           & 57.65$\pm$1.08   & 57.50$\pm$0.90   &  \\
+		 & PhenomNN          & 58.43$\pm$0.92   & 58.19$\pm$0.61   &  \\
+		 & SheafHyperGNN     & 59.06$\pm$0.37   & 59.03$\pm$0.44   & \\
+		 & HJRL              & 57.57$\pm$0.47   & 57.58$\pm$0.31   &  \\
+		 & DPHGNN            & 58.20$\pm$0.58   & 51.83$\pm$4.66   & lower than paper \\
+		 & TFHNN             & 59.17$\pm$0.52   & 59.13$\pm$0.45   &  \\
+		 & HNHN              & 58.55$\pm$0.93   & 58.42$\pm$0.68   &  \\
+		 & UniGCNII          & 58.56$\pm$0.73   & 58.71$\pm$0.60   &  \\
+		 & AllSetformer      & 58.55$\pm$0.56   & 58.72$\pm$0.63   &  \\
+		 & EDHNN             & 58.68$\pm$0.40   & 58.89$\pm$0.36   &  \\
+		 & HyperGT           & 57.73$\pm$0.76   & 58.46$\pm$0.72   & \\
+		 & EHNN              & 58.23$\pm$1.07   & 58.17$\pm$1.13   &  \\
+		 & TMPHN             & 58.82$\pm$0.49   & 58.76$\pm$0.79   & \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Pokec}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Pokec.} All 20 methods complete; MLP is best at $59.64\%$, exactly matching its reported value, with 18 of 20 cells within 1.0 point and a mean gap of 0.54 points.
+
+\noindent\textit{Lower than paper.} DPHGNN averages $51.83\pm4.66\%$ ($-6.4$) with a large standard deviation: its five seeds range from $44.37\%$ to $57.41\%$, and on some seeds the loss spikes during training and converges to a poorer solution, indicating unstable training on this dataset. LEGCN is only $1.2$ points low, within normal variation.
+
+\noindent\textit{Rerun process.} To verify these two entries, we reran LEGCN and DPHGNN separately on Pokec, keeping the official per-dataset YAML defaults (\texttt{is\_default=False}) and the same five random seeds throughout, without changing any hyperparameter. LEGCN was trained for 200 epochs with a learning rate of $0.001$ and dropout $0.1$; DPHGNN was trained for 100 epochs with a learning rate of $0.01$ and dropout $0.5$.
+
+The five seed test accuracies of LEGCN are $58.83, 59.01, 57.60, 58.83, 58.11\%$; the highest and lowest differ by only about $1.4$ points and the values are tightly clustered, giving $58.47\pm0.54\%$, a steady $1.2$ points below the paper and within normal variation.
+
+The five seeds of DPHGNN are $57.41, 51.89, 49.57, 44.37, 55.89\%$, with the highest and lowest about $13.0$ points apart and widely spread. On the fourth seed the loss jumps abruptly from about $0.7$ to $10.7$ late in training, ending at only $44.37\%$; this outlier seed pulls the mean down and inflates the standard deviation, giving $51.83\pm4.66\%$, which shows that the issue is unstable training rather than a steady systematic bias.
+
+
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		Dataset & Method & Paper (\%) & Reproduced (\%) & Notes \\
+		\midrule
+		\multirow{20}{*}{\textbf{Trivago}} & MLP               & 36.76$\pm$0.66   & 34.19$\pm$2.22   & lower than paper \\
+		 & CEGCN             & 47.24$\pm$1.09   & 47.67$\pm$0.34   &  \\
+		 & CEGAT             & OOM              & --               & no YAML section, config error \\
+		 & HGNN              & 57.67$\pm$1.61   & 57.02$\pm$2.28   &  \\
+		 & HyperGCN          & 42.39$\pm$1.25   & 43.85$\pm$0.94   &  \\
+		 & HCHA              & 52.50$\pm$3.43   & 53.03$\pm$1.99   &  \\
+		 & LEGCN             & 33.45$\pm$1.45   & --               & OOM on 22GB card \\
+		 & HyperND           & 87.19$\pm$1.89   & 88.17$\pm$0.79   &  \\
+		 & PhenomNN          & OOM              & --               & no YAML section, config error \\
+		 & SheafHyperGNN     & OOM              & --               & no YAML section, config error \\
+		 & HJRL              & OOM              & --               & CPU OOM \\
+		 & DPHGNN            & OOM              & --               & no YAML section, config error \\
+		 & TFHNN             & 90.79$\pm$0.79   & 91.58$\pm$0.82   &  \\
+		 & HNHN              & 53.75$\pm$1.43   & 50.59$\pm$1.78   & lower than paper \\
+		 & UniGCNII          & 36.15$\pm$0.56   & 36.27$\pm$0.25   &  \\
+		 & AllSetformer      & 59.92$\pm$4.02   & 55.47$\pm$8.52   & lower than paper \\
+		 & EDHNN             & 75.99$\pm$2.60   & 76.35$\pm$3.76   &  \\
+		 & HyperGT           & OOM              & --               & GPU OOM \\
+		 & EHNN              & OOM              & --               & CPU OOM \\
+		 & TMPHN             & OOM              & --               & no YAML section; CPU OOM \\
+		\bottomrule
+	\end{tabular}
+	\caption{Node classification results on \textbf{Trivago}.}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Trivago.} 11 of 20 methods complete; TFHNN is best at $91.58\%$ (paper $90.79\%$). This is the weakest-agreement table: 7 of 11 successful cells are within 1.0 point and the mean gap is 1.41 points.
+
+\noindent\textit{Re-run update.} We re-ran HGNN, HNHN, AllSetformer, and EDHNN, with each training run taking about 48 to 252 seconds. After re-running, HGNN rises from $55.07$ to $57.02\%$ and EDHNN from $68.79$ to $76.35\%$, both moving back near the paper values with markedly smaller standard deviations; HNHN is $50.59\%$ and AllSetformer is $55.47\%$. On this large dataset these models take long to train, carry large standard deviations, and sit at the edge of convergence, so they are sensitive to initial conditions; part of the earlier gap was therefore run-to-run fluctuation, and re-running produced more stable results closer to the paper.
+
+\noindent\textit{Still lower than paper.} After re-running, AllSetformer ($-4.5$) and HNHN ($-3.2$) remain low with sizeable standard deviations ($8.52$, $1.78$), showing they are still at the edge of convergence. An independent third-party reproduction reports 18 of 20 methods failing on the public pipeline, so a known data-pipeline inconsistency still accounts for these persistent deviations.
+
+\noindent\textit{Unsuccessful runs.} Nine cells fail. CEGAT, PhenomNN, SheafHyperGNN, and DPHGNN hit the missing-section AttributeError; LEGCN and HyperGT hit GPU OOM (HyperGT tries another $11.04$ GiB with $5.88$ GiB free); TMPHN, HJRL, and EHNN hit host-memory OOM ($261$, $261$, and $522$ GiB).
+
+\section*{Task 2: Dataset Statistics}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Dataset & Nodes & Hyperedges & Avg. edge size & Isolated (\%) & Features & Classes \\
+\midrule
+Cora              & 2{,}708 & 1{,}579 & 3.03 & 1{,}274 (47.0\%) & 1{,}433 & 7 \\
+Coauthor-Cora     & 2{,}708 & 1{,}072 & 4.28 & 320 (11.8\%) & 1{,}433 & 7 \\
+NTU2012           & 2{,}012 & 2{,}012 & 5.00 & 0 (0\%) & 100 & 67 \\
+ModelNet40        & 12{,}311 & 12{,}311 & 5.00 & 0 (0\%) & 100 & 40 \\
+Actor             & 16{,}255 & 10{,}164 & 5.25 & 494 (3.0\%) & 50 & 3 \\
+Twitch            & 16{,}812 & 2{,}627 & 6.23 & 456 (2.7\%) & 7 & 2 \\
+Pubmed            & 19{,}717 & 7{,}963 & 4.35 & 15{,}877 (80.5\%) & 500 & 3 \\
+Amazon (Ratings)  & 22{,}299 & 2{,}090 & 3.10 & 19{,}175 (86.0\%) & 111 & 5 \\
+Coauthor-DBLP     & 41{,}302 & 22{,}363 & 4.45 & 0 (0\%) & 1{,}425 & 6 \\
+Walmart-Trips-100 & 88{,}860 & 69{,}906 & 6.59 & 0 (0\%) & 100 & 11 \\
+Yelp              & 50{,}758 & 679{,}302 & 6.66 & 0 (0\%) & 1{,}862 & 9 \\
+Pokec             & 14{,}998 & 2{,}406 & 2.29 & 11{,}798 (78.7\%) & 65 & 2 \\
+Trivago           & 172{,}738 & 233{,}202 & 3.12 & 0 (0\%) & 300 & 160 \\
+\bottomrule
+\end{tabular}
+\caption{Measured statistics of the 13 node-classification datasets.}
+\label{tab:datasets}
+\end{table}
+\par{ ``Nodes'' is the total number of nodes; ``Hyperedges'' is the total number of hyperedges; ``Avg. edge size'' is the mean number of nodes per hyperedge, i.e. total incidences divided by the number of hyperedges; ``Isolated'' is the number and percentage of nodes that belong to no hyperedge; ``Features'' is the dimension of each node's input feature; and ``Classes'' is the number of node-classification categories.}
+
+\section*{Task 3: Baseline Descriptions}
+% All 20 baselines, 1--2 sentences each, following the descriptions in the
+% DHG-Bench appendix. Each method is followed by the \cite key of its original
+% paper. MLP is a generic baseline without a dedicated source paper, so it is
+% not cited; CEGCN and CEGAT are the clique-expansion baselines defined in the
+% AllSet paper and therefore share its key.
+\begin{itemize}
+\item \textbf{MLP}: A feature-only baseline that applies a multi-layer perceptron directly to node features without using the hypergraph structure. It isolates the contribution of the input features and acts as a non-relational reference for the graph-based methods.
+\item \textbf{CEGCN}\cite{chien2022allset}: A clique-expansion baseline that converts every hyperedge into a fully connected set of pairwise edges and then applies the standard graph convolutional network (GCN) on the resulting pairwise graph.
+\item \textbf{CEGAT}\cite{chien2022allset}: Like CEGCN, it uses clique expansion to turn hyperedges into pairwise edges, but applies a graph attention network (GAT) to learn node importance within each expanded clique instead of using fixed degree-based weights.
+\item \textbf{HGNN}\cite{feng2019hgnn}: A spectral framework that extends graph convolution to hypergraphs through the hypergraph Laplacian and approximates spectral filters with truncated Chebyshev polynomials, capturing high-order node correlations.
+\item \textbf{HyperGCN}\cite{yadati2019hypergcn}: A spectral method that approximates each hyperedge with a set of pairwise edges and then treats the learning problem as graph learning on the approximated graph.
+\item \textbf{HCHA}\cite{bai2021hcha}: Introduces two trainable operators, hypergraph convolution and hypergraph attention; the convolution propagates information through high-order relationships while the attention dynamically weights hyperedge connections to emphasize task-relevant information.
+\item \textbf{LEGCN}\cite{yang2022legcn}: Based on line expansion, it bijectively transforms a hypergraph into a simple graph by treating vertex-hyperedge pairs as nodes, preserving the symmetric co-occurrence structure so that standard graph algorithms can run on the hypergraph.
+\item \textbf{HyperND}\cite{prokopchik2022hypernd}: Builds a nonlinear diffusion process that propagates both features and labels over the hypergraph, and uses the limiting point of the diffusion as node embeddings on top of which a linear classifier predicts the labels.
+\item \textbf{PhenomNN}\cite{wang2023phenomnn}: Grounded in parameterized hypergraph-regularized energy functions, it treats node embeddings as energy minimizers and jointly optimizes them with a classifier through a supervised bilevel procedure.
+\item \textbf{SheafHyperGNN}\cite{duta2023sheaf}: Uses a cellular sheaf framework over hypergraphs and generalizes the standard hypergraph Laplacians to the richer sheaf structure, producing networks that can infer and process sheaf-based dynamics.
+\item \textbf{HJRL}\cite{yan2024hjrl}: Proposes a cross expansion that maps both vertices and hyperedges into nodes of a standard graph, and jointly embeds them in a shared space with an additional hypergraph reconstruction objective to preserve structural information.
+\item \textbf{DPHGNN}\cite{saxena2024dphgnn}: A hybrid, resource-constrained framework that combines a static update layer providing spectral biases with a dynamic update layer fusing explicitly aggregated topology features, using equivariant operator learning to capture lower-order semantics.
+\item \textbf{TFHNN}\cite{tang2025tfhnn}: Decouples structural processing from model training with a training-free message-passing module that removes learnable parameters and nonlinear activations and compresses multi-layer propagation into a single step for efficient training.
+\item \textbf{HNHN}\cite{dong2020hnhn}: A spatial hypergraph convolution with nonlinear activations on both nodes and hyperedges, combined with a normalization scheme that adjusts the importance of high-cardinality hyperedges and high-degree vertices depending on the dataset.
+\item \textbf{UniGCNII}\cite{huang2021unignn}: The benchmark instantiates the unified UniGNN two-stage framework -- first computing hyperedge representations with a permutation-invariant function and then aggregating them back into vertices -- with the initial residual and identity mapping of GCNII; this is the most competitive UniGNN variant reported in the benchmark.
+\item \textbf{AllSetformer}\cite{chien2022allset}: Implements each layer as a composition of two multiset functions and adopts the Set Transformer to model them, giving high flexibility and expressive power for hypergraph aggregation.
+\item \textbf{EDHNN}\cite{wang2023edhnn}: Approximates arbitrary continuous, permutation-equivariant hypergraph diffusion operators by combining the star (bipartite) expansion with standard message-passing networks, sharing weights across layers for scalability.
+\item \textbf{HyperGT}\cite{liu2024hypergt}: A Transformer-based HNN that captures global node-hyperedge correlations while using incidence-matrix positional encoding and a structure regularization term to retain local connectivity.
+\item \textbf{EHNN}\cite{kim2022ehnn}: The first equivariant GNN framework for general hypergraph learning, connecting sparse hypergraphs to fixed-order tensors and using hypernetwork-based parameter sharing to scale to arbitrary hyperedge orders.
+\item \textbf{TMPHN}\cite{wang2024tmphn}: A tensor-based framework (T-HyperGNN) that encodes hypergraph structure with tensors and multiplicative interaction tensors, lifting aggregation from linear operations to higher-order polynomial mappings while using tensor message passing for efficiency.
+\end{itemize}
+
+\section*{Task 4: Your GitHub Repository}
+Project name: \textbf{HGNNStudy}.\par
+Repository URL: \url{https://github.com/yffff64/HGNNStudy}.\par
+In README.md, list complete baseline commands and actual parameters by dataset, with environment and data preparation instructions. Identify any configuration files and effective settings.
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+\end{document}

@@ -607,7 +607,12 @@ def line_expansion(data,args):
     ones = torch.ones(L.shape[1], device=L.device)
     adj, value = torch_sparse.spspmm(L, ones, L_T, ones, num_ne_pairs, V_plus_E, num_ne_pairs, coalesced=True)
     adj, value = torch_sparse.coalesce(adj, value, num_ne_pairs, num_ne_pairs, op="add")
-    return adj.to(args.device)
+    le_adj = torch_sparse.SparseTensor.from_edge_index(
+        adj,
+        edge_attr=value,
+        sparse_sizes=(num_ne_pairs, num_ne_pairs),
+    ).t()
+    return le_adj.to(args.device)
 
 #---------------------- HJRL preprocessing utils -------------------------
 
@@ -850,7 +855,7 @@ def ehnn_preprocessing(
     data = data.to('cpu')
     
     # build memory-efficiently for yelp and walmart-trips-100
-    if args.dname not in ["yelp", "walmart-trips-100"]:
+    if args.dname not in ["yelp", "walmart-trips-100", "coauthor_dblp"]:
         original_edge_index = data.hyperedge_index
         data = ConstructH(data)  # [|V|, |E|]
         incidence_d = (

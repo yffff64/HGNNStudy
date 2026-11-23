@@ -42,3 +42,11 @@ depcheck.txt
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# ===== 备份文件 =====
+*.bak
+
+# ===== 本机辅助脚本与运行时状态（非复现必需）=====
+finish_and_shutdown.py
+finish_and_shutdown.bat
+run_node_cls_status.json

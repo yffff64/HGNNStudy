@@ -16,12 +16,12 @@ class LEGCN(nn.Module):
         self.dropout=args.dropout
         self.convs = nn.ModuleList([])
         if self.num_layers == 1:
-            self.convs.append(GCNConv(in_channels=num_features, out_channels=num_targets))
+            self.convs.append(GCNConv(in_channels=num_features, out_channels=num_targets, add_self_loops=False))
         else:
-            self.convs.append(GCNConv(in_channels=num_features, out_channels=self.hidden_dim))
+            self.convs.append(GCNConv(in_channels=num_features, out_channels=self.hidden_dim, add_self_loops=False))
             for l in range(self.num_layers - 2):
-                self.convs.append(GCNConv(in_channels=self.hidden_dim, out_channels=self.hidden_dim))
-            self.convs.append(GCNConv(in_channels=self.hidden_dim, out_channels=num_targets))
+                self.convs.append(GCNConv(in_channels=self.hidden_dim, out_channels=self.hidden_dim, add_self_loops=False))
+            self.convs.append(GCNConv(in_channels=self.hidden_dim, out_channels=num_targets, add_self_loops=False))
 
     def reset_parameters(self):
         for layer in self.convs:

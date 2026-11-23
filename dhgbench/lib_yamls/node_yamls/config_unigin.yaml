@@ -1,13 +1,13 @@
 default:
-  All_num_layers: 1
-  embedding_hidden: 256
+  All_num_layers: 2
+  embedding_hidden: 64
   MLP_hidden: 128
   epochs: 200
-  dropout: 0.5
+  dropout: 0.6
   lr: 1.0e-2
-  wd: 0
+  wd: 0.0005
 
-  first_aggregate: "sum" # first_aggregate: ['mean', 'sum']
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
   input_drop: 0.2
   attn_drop: 0.2
   activation: "relu" # activation: ['relu', 'prelu']
@@ -18,15 +18,243 @@ default:
   UniGNN_degE: 0
 
 cora:
-  All_num_layers: 1
-  embedding_hidden: 256
+  All_num_layers: 2
+  embedding_hidden: 64
   MLP_hidden: 128
   epochs: 200
-  dropout: 0.5
+  dropout: 0.6
   lr: 1.0e-2
-  wd: 0
+  wd: 0.0005
 
-  first_aggregate: "sum" # first_aggregate: ['mean', 'sum']
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+coauthor_cora:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+NTU2012:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+ModelNet40:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+actor:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+twitch:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+pubmed:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+amazon:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+coauthor_dblp:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+walmart-trips-100:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+yelp:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+pokec:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
+  input_drop: 0.2
+  attn_drop: 0.2
+  activation: "relu" # activation: ['relu', 'prelu']
+  use_norm: true
+  uni_heads: 1
+  restart_alpha: 0.5
+  UniGNN_degV: 0
+  UniGNN_degE: 0
+
+trivago:
+  All_num_layers: 2
+  embedding_hidden: 64
+  MLP_hidden: 128
+  epochs: 200
+  dropout: 0.6
+  lr: 1.0e-2
+  wd: 0.0005
+
+  first_aggregate: "mean" # first_aggregate: ['mean', 'sum']
   input_drop: 0.2
   attn_drop: 0.2
   activation: "relu" # activation: ['relu', 'prelu']

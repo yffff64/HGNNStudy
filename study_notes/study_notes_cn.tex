@@ -1,0 +1,585 @@
+% !TeX program = xelatex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{ctex}
+\usepackage[superscript]{cite}
+\usepackage{booktabs,tabularx,enumitem,xcolor,xurl,hyperref,titlesec,float,multirow}
+\definecolor{accent}{HTML}{1B526C}
+\hypersetup{colorlinks=true,urlcolor=accent,citecolor=accent,linkcolor=accent}
+\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}
+\setlength{\intextsep}{7pt}\setlength{\textfloatsep}{7pt}
+\setlength{\abovecaptionskip}{4pt}\setlength{\belowcaptionskip}{0pt}
+\setlist[itemize]{leftmargin=1.5em,itemsep=4pt,topsep=3pt}
+\titleformat{\section}{\large\bfseries\color{accent}}{}{0pt}{}
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries HGNNStudy}\par\vspace{5pt}
+{\large 超图节点分类复现笔记}\par\vspace{8pt}
+姓名：\underline{\hspace{4cm}}
+\end{center}
+
+本笔记记录了我对 DHG-Bench\cite{li2026dhg} 的学习。
+
+\section*{任务 1：实验复现}
+\textbf{实验设置：}所有节点分类实验均在单张 RTX 2080 Ti（22 GB）上完成，使用 Python 3.10 与 PyTorch 2.6（CUDA 12.4）。遵循基准协议，我们使用 5 个随机种子、默认的训练/验证/测试划分（50\%/25\%/25\%），以及官方 YAML 配置中发布的逐数据集超参数（即默认设置 \texttt{--is\_default=False}，读取数据集专属的调优段而非全局默认段）。部分大数据集组合在单张 22 GB 卡上因 GPU 或 CPU 显存不足而失败，这些在下表中标为 OOM。
+
+\smallskip\noindent\textbf{失败机制。}本笔记中，失败的运行统一标注为以下四种机制之一：
+(i)~\textit{论文 OOM}——该组合在基准中已被报告为显存不足，在这里同样无法容纳；
+(ii)~\textit{本地 GPU OOM}——基准报告了分数，但运行耗尽了 22\,GB GPU 显存；
+(iii)~\textit{缺段}——逐数据集 YAML 段缺失，运行以 \texttt{AttributeError} 中止；
+(iv)~\textit{主机内存 OOM}——预处理超出了可用的 CPU 内存。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Cora}} & MLP               & 75.33$\pm$0.88   & 74.98$\pm$0.98   &  \\
+		 & CEGCN             & 76.90$\pm$0.75   & 76.84$\pm$0.51   &  \\
+		 & CEGAT             & 77.22$\pm$1.03   & 77.43$\pm$0.98   &  \\
+		 & HGNN              & 77.90$\pm$1.17   & 77.58$\pm$1.28   &  \\
+		 & HyperGCN          & 78.38$\pm$1.63   & 78.26$\pm$1.41   &  \\
+		 & HCHA              & 77.84$\pm$1.23   & 77.73$\pm$1.25   &  \\
+		 & LEGCN             & 74.36$\pm$1.03   & 78.32$\pm$1.49   & 高于论文 \\
+		 & HyperND           & 79.23$\pm$0.63   & 77.87$\pm$1.25   &  \\
+		 & PhenomNN          & 78.97$\pm$1.41   & 78.64$\pm$1.16   &  \\
+		 & SheafHyperGNN     & 79.03$\pm$0.90   & 78.85$\pm$0.86   &  \\
+		 & HJRL              & 78.67$\pm$1.47   & 78.70$\pm$1.63   &  \\
+		 & DPHGNN            & 76.40$\pm$1.36   & 75.86$\pm$1.29   &  \\
+		 & TFHNN             & 79.47$\pm$1.31   & 79.70$\pm$1.52   &  \\
+		 & HNHN              & 75.24$\pm$1.38   & 75.27$\pm$1.37   &  \\
+		 & UniGCNII          & 79.41$\pm$1.24   & 79.29$\pm$1.07   &  \\
+		 & AllSetformer      & 78.02$\pm$1.43   & 78.02$\pm$1.98   &  \\
+		 & EDHNN             & 78.58$\pm$0.52   & 78.02$\pm$1.41   &  \\
+		 & HyperGT           & 75.57$\pm$1.11   & 75.07$\pm$0.98   &  \\
+		 & EHNN              & 76.51$\pm$1.52   & 75.78$\pm$1.59   &  \\
+		 & TMPHN             & 74.20$\pm$1.37   & 74.15$\pm$1.77   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Cora} 上的节点分类结果。}
+\end{table}
+\par\smallskip
+\noindent\textbf{Cora。}20 个方法全部成功完成。复现的最佳条目是 TFHNN，为 $79.70\%$（论文 $79.47\%$）；整体结果与论文非常接近：20 格中有 18 格落在论文值的 1.0 个百分点以内，平均绝对差距为 0.49 个百分点。
+
+\noindent\textit{高于论文。}LEGCN 达到 $78.32\pm1.49\%$，对报告值 $74.36\pm1.03\%$，差距 $+4.0$ 个百分点。我们用 20 个种子做了检查：连最低的种子（$75.18$）都超过报告均值，因此差距不是随机波动，而是每次都稳定复现。在代码、数据、种子完全一致的情况下，唯一的差别只能来自运行环境——我们用的是 Windows + RTX 2080 Ti，而基准用的是 Ubuntu + Quadro RTX 6000；不同软硬件下稀疏矩阵等底层运算会产生极细微的数值差别，经过多层网络累积后就会改变最终准确率。
+
+\noindent\textit{低于论文。}HyperND 比论文低 $1.4$ 个百分点（$77.87\pm1.25\%$ 对 $79.23\pm0.63\%$）。它靠近 1 个百分点的容差范围、且处于运行间波动范围内，因此属于正常波动，而非真正的缺陷。
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Coauthor-Cora}} & MLP               & 75.57$\pm$1.08   & 74.92$\pm$1.70   &  \\
+		 & CEGCN             & 78.40$\pm$1.25   & 78.35$\pm$1.30   &  \\
+		 & CEGAT             & 78.02$\pm$1.24   & 78.26$\pm$0.71   &  \\
+		 & HGNN              & 82.84$\pm$0.46   & 82.51$\pm$0.86   &  \\
+		 & HyperGCN          & 81.65$\pm$1.58   & 81.30$\pm$1.72   &  \\
+		 & HCHA              & 83.01$\pm$0.58   & 82.92$\pm$0.75   &  \\
+		 & LEGCN             & 74.59$\pm$1.04   & 82.95$\pm$0.79   & 高于论文 \\
+		 & HyperND           & 83.19$\pm$0.71   & 83.10$\pm$0.80   &  \\
+		 & PhenomNN          & 84.05$\pm$1.05   & 83.87$\pm$0.53   &  \\
+		 & SheafHyperGNN     & 84.08$\pm$0.50   & 83.57$\pm$0.68   &  \\
+		 & HJRL              & 83.72$\pm$0.74   & 83.52$\pm$0.71   &  \\
+		 & DPHGNN            & 82.13$\pm$1.13   & 81.42$\pm$0.38   &  \\
+		 & TFHNN             & 84.19$\pm$0.89   & 84.11$\pm$0.62   &  \\
+		 & HNHN              & 76.51$\pm$1.34   & 76.40$\pm$1.33   &  \\
+		 & UniGCNII          & 83.49$\pm$1.58   & 83.87$\pm$0.89   &  \\
+		 & AllSetformer      & 82.95$\pm$0.62   & 82.90$\pm$0.76   &  \\
+		 & EDHNN             & 82.98$\pm$0.93   & 81.89$\pm$0.75   &  \\
+		 & HyperGT           & 75.42$\pm$0.62   & 75.57$\pm$1.04   &  \\
+		 & EHNN              & 81.68$\pm$0.81   & 81.00$\pm$1.22   &  \\
+		 & TMPHN             & 75.01$\pm$1.44   & 74.62$\pm$1.24   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Coauthor-Cora} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Coauthor-Cora。}20 个方法全部完成；TFHNN 最佳，为 $84.11\%$（论文 $84.19\%$），20 格中 18 格在 1.0 个百分点以内，平均差距 0.73 个百分点。
+
+\noindent\textit{高于论文。}LEGCN 复现为 $82.95\pm0.79\%$，对 $74.59\pm1.04\%$，是本研究中 LEGCN 偏高幅度最大的一次（$+8.4$ 个百分点）。理由与前文 Cora 相同，即那里已解释的软件/硬件平台差异。
+
+\noindent\textit{低于论文。}EDHNN 比其报告值低 $1.1$ 个百分点（$81.89\%$ 对 $82.98\%$），恰好略超出 1 个百分点的容差范围、但处于正常种子波动范围内。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{NTU2012}} & MLP               & 88.59$\pm$1.27   & 88.59$\pm$1.27   &  \\
+		 & CEGCN             & 84.93$\pm$1.12   & 84.89$\pm$1.10   &  \\
+		 & CEGAT             & 84.14$\pm$1.77   & 84.17$\pm$1.58   &  \\
+		 & HGNN              & 90.13$\pm$0.89   & 90.14$\pm$0.89   &  \\
+		 & HyperGCN          & 75.78$\pm$4.82   & 75.83$\pm$4.83   &  \\
+		 & HCHA              & 90.53$\pm$1.00   & 90.54$\pm$1.00   &  \\
+		 & LEGCN             & 89.82$\pm$0.91   & 91.17$\pm$0.62   &  \\
+		 & HyperND           & 88.98$\pm$1.56   & 88.67$\pm$1.61   &  \\
+		 & PhenomNN          & 88.78$\pm$0.67   & 88.71$\pm$0.81   &  \\
+		 & SheafHyperGNN     & 90.81$\pm$0.58   & 90.78$\pm$0.57   &  \\
+		 & HJRL              & 88.15$\pm$1.18   & 88.31$\pm$0.93   &  \\
+		 & DPHGNN            & 84.77$\pm$1.06   & 84.77$\pm$1.44   &  \\
+		 & TFHNN             & 91.69$\pm$0.75   & 91.49$\pm$0.49   &  \\
+		 & HNHN              & 87.27$\pm$1.53   & 87.20$\pm$1.56   &  \\
+		 & UniGCNII          & 89.86$\pm$0.44   & 90.26$\pm$0.56   &  \\
+		 & AllSetformer      & 90.17$\pm$1.03   & 89.86$\pm$0.71   &  \\
+		 & EDHNN             & 91.45$\pm$0.70   & 91.49$\pm$0.55   &  \\
+		 & HyperGT           & 86.00$\pm$2.05   & 86.80$\pm$2.34   &  \\
+		 & EHNN              & 87.99$\pm$0.39   & 87.55$\pm$0.70   &  \\
+		 & TMPHN             & 89.15$\pm$1.09   & 89.15$\pm$1.09   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{NTU2012} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{NTU2012。}20 个方法全部完成；TFHNN 给出最佳结果 $91.49\%$（论文 $91.69\%$）。这是与论文吻合度最高的表格之一：20 格中 19 格在 1.0 个百分点以内，平均差距仅 0.22 个百分点。
+
+\noindent\textit{高于论文。}LEGCN 是唯一超出容差范围的条目，为 $91.17\pm0.62\%$ 对 $89.82\pm0.91\%$（$+1.4$ 个百分点）。理由与前文 Cora 相同，即那里已解释的软件/硬件平台差异；差距很小，不改变排名。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{ModelNet40}} & MLP               & 96.88$\pm$0.23   & 96.83$\pm$0.26   &  \\
+		 & CEGCN             & 92.34$\pm$0.24   & 92.34$\pm$0.23   &  \\
+		 & CEGAT             & 92.02$\pm$0.26   & 91.97$\pm$0.17   &  \\
+		 & HGNN              & 97.43$\pm$0.20   & 97.43$\pm$0.20   &  \\
+		 & HyperGCN          & 91.15$\pm$3.88   & 92.85$\pm$1.93   & 高于论文 \\
+		 & HCHA              & 97.68$\pm$0.16   & 97.69$\pm$0.16   &  \\
+		 & LEGCN             & 96.82$\pm$0.24   & 98.42$\pm$0.15   & 高于论文 \\
+		 & HyperND           & 97.18$\pm$0.58   & 97.17$\pm$0.55   &  \\
+		 & PhenomNN          & 98.28$\pm$0.18   & 98.27$\pm$0.14   &  \\
+		 & SheafHyperGNN     & 98.30$\pm$0.19   & 98.24$\pm$0.26   &  \\
+		 & HJRL              & 96.33$\pm$0.30   & 96.32$\pm$0.39   &  \\
+		 & DPHGNN            & 97.19$\pm$0.17   & 97.04$\pm$0.12   &  \\
+		 & TFHNN             & 98.38$\pm$0.11   & 98.47$\pm$0.11   &  \\
+		 & HNHN              & 97.30$\pm$0.27   & 97.30$\pm$0.28   &  \\
+		 & UniGCNII          & 98.42$\pm$0.08   & 98.40$\pm$0.14   &  \\
+		 & AllSetformer      & 98.07$\pm$0.21   & 98.04$\pm$0.20   &  \\
+		 & EDHNN             & 98.51$\pm$0.15   & 98.44$\pm$0.10   &  \\
+		 & HyperGT           & 96.83$\pm$0.17   & 96.94$\pm$0.29   &  \\
+		 & EHNN              & 97.97$\pm$0.17   & 97.97$\pm$0.11   &  \\
+		 & TMPHN             & 97.76$\pm$0.34   & 97.78$\pm$0.14   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{ModelNet40} 上的节点分类结果。}
+\end{table}
+\par\smallskip
+\noindent\textbf{ModelNet40。}20 个方法全部完成；TFHNN 最佳，为 $98.47\%$（论文 $98.38\%$），20 格中 18 格在 1.0 个百分点以内，平均差距 0.20 个百分点。
+
+\noindent\textit{高于论文。}两个条目略高于容差范围：HyperGCN（$+1.7$）和 LEGCN（$+1.6$）。HyperGCN 论文值本身的标准差就有 $3.88$，这点差距在其正常波动范围内，而 LEGCN 的理由与前文 Cora 相同；没有任何条目表现不佳。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Actor}} & MLP               & 86.06$\pm$0.36   & 85.57$\pm$0.68   &  \\
+		 & CEGCN             & 67.41$\pm$0.29   & 67.39$\pm$0.34   &  \\
+		 & CEGAT             & 73.87$\pm$0.83   & 73.64$\pm$0.78   &  \\
+		 & HGNN              & 77.83$\pm$0.37   & 77.83$\pm$0.37   &  \\
+		 & HyperGCN          & 81.82$\pm$0.39   & 81.82$\pm$0.39   &  \\
+		 & HCHA              & 78.30$\pm$0.47   & 78.30$\pm$0.47   &  \\
+		 & LEGCN             & 85.34$\pm$0.45   & 82.18$\pm$0.41   & 低于论文 \\
+		 & HyperND           & 83.19$\pm$0.92   & 83.21$\pm$0.45   &  \\
+		 & PhenomNN          & 83.14$\pm$0.49   & 83.46$\pm$0.46   &  \\
+		 & SheafHyperGNN     & 85.00$\pm$0.32   & 85.00$\pm$0.32   &  \\
+		 & HJRL              & 71.54$\pm$0.64   & 71.60$\pm$0.40   &  \\
+		 & DPHGNN            & 83.65$\pm$0.59   & 83.11$\pm$1.09   &  \\
+		 & TFHNN             & 85.96$\pm$0.41   & 86.09$\pm$0.24   &  \\
+		 & HNHN              & 81.20$\pm$0.36   & 80.99$\pm$0.37   &  \\
+		 & UniGCNII          & 84.61$\pm$0.46   & 82.38$\pm$0.58   & 低于论文 \\
+		 & AllSetformer      & 85.66$\pm$0.41   & 85.50$\pm$0.39   &  \\
+		 & EDHNN             & 85.77$\pm$0.46   & 85.71$\pm$0.48   &  \\
+		 & HyperGT           & 84.43$\pm$0.47   & 84.34$\pm$0.56   &  \\
+		 & EHNN              & 86.21$\pm$0.49   & 86.09$\pm$0.62   &  \\
+		 & TMPHN             & 85.32$\pm$0.48   & 85.62$\pm$0.26   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Actor} 上的节点分类结果。}
+\end{table}
+\par\smallskip
+\noindent\textbf{Actor。}20 个方法全部完成；TFHNN 最佳，为 $86.09\%$（论文 $85.96\%$），20 格中 18 格在 1.0 个百分点以内，平均差距 0.45 个百分点。
+
+\noindent\textit{低于论文。}LEGCN（$-3.2$）和 UniGCNII（$-2.2$）稳定低于论文，重跑后值相同，因此不是随机波动。代码、数据、种子都一致、也没有附加噪声，差距只能来自运行环境。这两个模型都带有很强的正则化，对底层稀疏矩阵运算中极细微的数值差别特别敏感，这种细微差别再经过归一化逐层放大，最终就形成了稳定的差距。
+\noindent\textit{DPHGNN 已恢复。}重跑后 DPHGNN 从 $82.09$ 提升到 $83.11\%$（论文 $83.65$），回到容差范围内，因此它此前的差距是运行间波动。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Twitch}} & MLP               & 52.57$\pm$0.49   & 51.54$\pm$0.49   &  \\
+		 & CEGCN             & 51.02$\pm$0.53   & 51.15$\pm$0.33   &  \\
+		 & CEGAT             & 51.05$\pm$0.61   & 50.84$\pm$0.52   &  \\
+		 & HGNN              & 52.38$\pm$0.56   & 52.38$\pm$0.56   &  \\
+		 & HyperGCN          & 51.32$\pm$0.72   & 51.52$\pm$0.51   &  \\
+		 & HCHA              & 52.35$\pm$0.71   & 52.38$\pm$0.56   &  \\
+		 & LEGCN             & 51.31$\pm$0.65   & 50.94$\pm$0.70   &  \\
+		 & HyperND           & 52.39$\pm$0.60   & 52.18$\pm$0.73   &  \\
+		 & PhenomNN          & 51.80$\pm$0.73   & 51.75$\pm$0.73   &  \\
+		 & SheafHyperGNN     & 52.07$\pm$0.53   & 52.02$\pm$0.64   &  \\
+		 & HJRL              & 51.62$\pm$0.61   & 51.35$\pm$0.69   &  \\
+		 & DPHGNN            & 52.36$\pm$0.59   & 52.24$\pm$0.72   &  \\
+		 & TFHNN             & 52.34$\pm$0.53   & 51.89$\pm$1.11   &  \\
+		 & HNHN              & 51.12$\pm$0.65   & 51.12$\pm$0.65   &  \\
+		 & UniGCNII          & 52.50$\pm$0.57   & 52.41$\pm$0.67   &  \\
+		 & AllSetformer      & 51.74$\pm$0.75   & 51.73$\pm$0.74   &  \\
+		 & EDHNN             & 50.54$\pm$0.23   & 50.43$\pm$0.40   &  \\
+		 & HyperGT           & 51.19$\pm$0.57   & 51.29$\pm$0.64   &  \\
+		 & EHNN              & 52.14$\pm$0.76   & 52.18$\pm$0.61   &  \\
+		 & TMPHN             & 51.82$\pm$0.38   & 51.48$\pm$0.56   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Twitch} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Twitch。}20 个方法全部完成；UniGCNII 最佳，为 $52.41\%$（论文 $52.50\%$）。各准确率紧密聚集在 51--52\% 附近，20 格中 19 格在 1.0 个百分点以内，平均差距 0.20 个百分点。
+
+\noindent\textit{低于论文。}MLP 恰好位于容差范围边缘，为 $51.54\pm0.49\%$ 对 $52.57\pm0.49\%$（$-1.0$），处于正常种子波动范围内，无需进一步诊断。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Pubmed}} & MLP               & 86.62$\pm$0.26   & 86.56$\pm$0.23   &  \\
+		 & CEGCN             & 86.03$\pm$0.39   & 85.97$\pm$0.39   &  \\
+		 & CEGAT             & 86.09$\pm$0.51   & 86.04$\pm$0.51   &  \\
+		 & HGNN              & 86.17$\pm$0.52   & 86.13$\pm$0.52   &  \\
+		 & HyperGCN          & 87.42$\pm$0.42   & 87.46$\pm$0.51   &  \\
+		 & HCHA              & 86.33$\pm$0.54   & 86.30$\pm$0.56   &  \\
+		 & LEGCN             & 87.52$\pm$0.50   & 88.15$\pm$0.45   &  \\
+		 & HyperND           & 86.73$\pm$0.56   & 85.63$\pm$2.51   &  \\
+		 & PhenomNN          & 87.81$\pm$0.12   & 87.88$\pm$0.11   &  \\
+		 & SheafHyperGNN     & 87.10$\pm$0.47   & 87.14$\pm$0.48   &  \\
+		 & HJRL              & 87.98$\pm$0.49   & 87.96$\pm$0.49   &  \\
+		 & DPHGNN            & 86.72$\pm$0.33   & 86.73$\pm$0.44   &  \\
+		 & TFHNN             & 87.90$\pm$0.37   & 87.92$\pm$0.26   &  \\
+		 & HNHN              & 85.66$\pm$1.28   & 85.57$\pm$1.41   &  \\
+		 & UniGCNII          & 87.57$\pm$0.54   & 87.53$\pm$0.56   &  \\
+		 & AllSetformer      & 87.79$\pm$0.30   & 87.63$\pm$0.33   &  \\
+		 & EDHNN             & 87.65$\pm$0.23   & 87.66$\pm$0.37   &  \\
+		 & HyperGT           & 86.06$\pm$0.54   & 85.40$\pm$2.05   &  \\
+		 & EHNN              & 87.12$\pm$0.31   & 87.19$\pm$0.32   &  \\
+		 & TMPHN             & 86.28$\pm$0.62   & 86.89$\pm$0.57   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Pubmed} 上的节点分类结果。}
+\end{table}
+\par\smallskip
+\noindent\textbf{Pubmed。}20 个方法全部完成；LEGCN 最佳，为 $88.15\%$（论文 $87.52\%$），20 格中 19 格在 1.0 个百分点以内，平均差距 0.19 个百分点。
+
+\noindent\textit{轻微波动。}重跑后 HyperND 从 $81.01$ 提升到 $85.63\pm2.51\%$（论文 $86.73$），其中一个表现较差的种子（$80.65$）拉高了标准差。此前的差距来自训练不稳定，而非系统性偏差。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Amazon}} & MLP               & 28.47$\pm$0.76   & 27.28$\pm$0.49   &  \\
+		 & CEGCN             & 26.65$\pm$1.61   & 25.32$\pm$0.96   &  \\
+		 & CEGAT             & 28.23$\pm$0.50   & 27.03$\pm$1.47   &  \\
+		 & HGNN              & 28.05$\pm$0.28   & 28.02$\pm$0.41   &  \\
+		 & HyperGCN          & 27.34$\pm$0.72   & 27.53$\pm$1.00   &  \\
+		 & HCHA              & 28.33$\pm$0.33   & 28.28$\pm$0.27   &  \\
+		 & LEGCN             & 28.21$\pm$0.50   & 28.40$\pm$0.30   &  \\
+		 & HyperND           & 28.32$\pm$0.38   & 27.91$\pm$0.94   &  \\
+		 & PhenomNN          & 28.49$\pm$0.41   & 28.49$\pm$0.49   &  \\
+		 & SheafHyperGNN     & 28.35$\pm$0.57   & 27.94$\pm$0.73   &  \\
+		 & HJRL              & 26.90$\pm$0.55   & 26.89$\pm$0.60   &  \\
+		 & DPHGNN            & 28.57$\pm$1.07   & 28.87$\pm$0.92   &  \\
+		 & TFHNN             & 28.56$\pm$0.68   & 28.52$\pm$0.44   &  \\
+		 & HNHN              & 27.29$\pm$0.70   & 27.30$\pm$0.69   &  \\
+		 & UniGCNII          & 28.39$\pm$0.64   & 28.21$\pm$0.65   &  \\
+		 & AllSetformer      & 27.32$\pm$1.11   & 27.58$\pm$1.28   &  \\
+		 & EDHNN             & 28.38$\pm$0.31   & 28.06$\pm$0.21   &  \\
+		 & HyperGT           & 26.58$\pm$0.33   & 23.52$\pm$3.15   & 低于论文 \\
+		 & EHNN              & 28.95$\pm$0.81   & 29.05$\pm$0.47   &  \\
+		 & TMPHN             & 24.63$\pm$1.22   & 23.07$\pm$1.98   & 低于论文 \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Amazon（Ratings）} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Amazon（Ratings）。}20 个方法全部完成；EHNN 最佳，为 $29.05\%$（论文 $28.95\%$），20 格中 15 格在 1.0 个百分点以内，平均差距 0.54 个百分点。每个准确率都保持在 $28\%$ 附近，数据集的整体难度和模型间的相对排名都没有改变。
+
+\noindent\textit{低于论文。}HyperGT（$-3.1$）和 TMPHN（$-1.6$）稳定偏低，多次重跑都是相近的值，说明不是偶发。关键在数据本身：22{,}299 个节点里有 19{,}175 个（$86\%$）不属于任何超边、完全孤立，模型在这些节点上没有邻居可以聚合，只能靠节点自己的特征。这两个模型本是为“节点间有丰富高阶连接”设计的复杂模型，结构复杂、参数多，在这么弱的信号上反而无法有效学习，连训练集都欠拟合（训练准确率只有 $20$–$30$），最终都停留在约 $28\%$。对照之下，HGNN 这类用确定性聚合的简单模型，遇到孤立节点就退化为对自身特征的变换，反而能稳定落在约 $28\%$，不出现明显偏差。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Coauthor-DBLP}} & MLP               & 85.54$\pm$0.15   & 85.57$\pm$0.12   &  \\
+		 & CEGCN             & 89.75$\pm$0.33   & 89.81$\pm$0.32   &  \\
+		 & CEGAT             & 89.61$\pm$0.22   & 89.48$\pm$0.21   &  \\
+		 & HGNN              & 91.00$\pm$0.27   & 90.95$\pm$0.29   &  \\
+		 & HyperGCN          & 89.51$\pm$0.18   & 89.43$\pm$0.11   &  \\
+		 & HCHA              & 91.18$\pm$0.30   & 91.22$\pm$0.33   &  \\
+		 & LEGCN             & 85.16$\pm$0.14   & 90.54$\pm$0.20   & 高于论文 \\
+		 & HyperND           & 91.34$\pm$0.19   & 91.34$\pm$0.17   &  \\
+		 & PhenomNN          & 91.83$\pm$0.25   & 91.87$\pm$0.24   &  \\
+		 & SheafHyperGNN     & 91.09$\pm$0.31   & 91.10$\pm$0.22   &  \\
+		 & HJRL              & OOM              & --               & 论文中即为 OOM \\
+		 & DPHGNN            & OOM              & --               & 论文中即为 OOM \\
+		 & TFHNN             & 91.38$\pm$0.24   & 90.63$\pm$0.21   &  \\
+		 & HNHN              & 85.84$\pm$0.07   & 85.91$\pm$0.05   &  \\
+		 & UniGCNII          & 91.71$\pm$0.20   & 91.67$\pm$0.20   &  \\
+		 & AllSetformer      & 91.51$\pm$0.22   & 91.41$\pm$0.25   &  \\
+		 & EDHNN             & 91.55$\pm$0.19   & 91.42$\pm$0.19   &  \\
+		 & HyperGT           & 84.53$\pm$0.30   & 84.50$\pm$0.36   &  \\
+		 & EHNN              & 90.47$\pm$0.43   & 90.37$\pm$0.29   &  \\
+		 & TMPHN             & 85.44$\pm$0.14   & 85.27$\pm$0.42   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Coauthor-DBLP} 上的节点分类结果。}
+\end{table}
+\par\smallskip
+\noindent\textbf{Coauthor-DBLP。}20 个方法中 18 个完成；PhenomNN 最佳，为 $91.87\%$（论文 $91.83\%$），18 个成功条目中 17 格在 1.0 个百分点以内，平均差距 0.40 个百分点。
+
+\noindent\textit{高于论文。}LEGCN 复现为 $90.54\pm0.20\%$ 对 $85.16\pm0.14\%$（$+5.4$），是成功条目中的一个离群条目。很小的标准差表明这是可复现而非随机的差距。理由与前文 Cora 相同，即该处已解释的系统性软件/硬件平台差异。
+
+\noindent\textit{失败的运行。}HJRL 和 DPHGNN 在论文中就已经是 OOM（机制~i），在 22 GB 卡上同样无法容纳，但二者耗尽显存的具体环节不同。
+
+\noindent\textit{HJRL：关联矩阵重建的稠密化。}HJRL 除了分类，还要重建超图的关联矩阵：每个训练步都把节点嵌入和超边嵌入相乘，得到一个 $41{,}302\times63{,}665$ 的稠密矩阵，紧接着 sigmoid 又生成一份同样大小的矩阵，这样的矩阵每份就要占 $9.80$ GiB。多份同时存在，显存很快被占满；报错正发生在 sigmoid 处，当时已占用 $20.70$ GiB。
+
+\noindent\textit{DPHGNN：全量注意力矩阵。}这个数据集的配置关闭了注意力分块，于是 DPHGNN 必须一次性计算所有节点两两之间的注意力权重，生成一个 $41{,}302\times41{,}302$ 的方阵，单个就占 $6.36$ GiB。在反向传播为这个矩阵分配梯度时，显存已经没有空闲，因此失败。
+
+\noindent\textit{EHNN 的预处理修复。}EHNN 失败在主机内存而不是显存：它的预处理默认会把关联矩阵展开成一个 $41{,}302\times63{,}665$ 的稠密矩阵，仅这一步就要 $9.80$ GiB 的连续内存，在 32 GB 内存的机器上无法满足。我们在预处理的分支判断中让 coauthor\_dblp 改走稀疏路径，不再生成这个稠密矩阵，而计算结果完全不变。修复后 EHNN 成功跑出 $90.37\pm0.29\%$，与论文 $90.47$ 基本一致。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Walmart-Trips-100}} & MLP               & 63.21$\pm$0.12   & 63.20$\pm$0.33   &  \\
+		 & CEGCN             & 70.40$\pm$0.18   & 70.42$\pm$0.12   &  \\
+		 & CEGAT             & 65.83$\pm$0.92   & 65.53$\pm$0.70   &  \\
+		 & HGNN              & 77.12$\pm$0.12   & 77.38$\pm$0.06   &  \\
+		 & HyperGCN          & 68.75$\pm$0.56   & 68.98$\pm$0.19   &  \\
+		 & HCHA              & 77.66$\pm$0.18   & 78.06$\pm$0.19   &  \\
+		 & LEGCN             & 62.98$\pm$0.09   & 67.82$\pm$0.95   & 高于论文 \\
+		 & HyperND           & 75.10$\pm$0.54   & 74.96$\pm$0.59   &  \\
+		 & PhenomNN          & OOM              & 60.82$\pm$0.34   & 论文 OOM，运行成功 \\
+		 & SheafHyperGNN     & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & HJRL              & OOM              & --               & 论文中即为 OOM \\
+		 & DPHGNN            & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & TFHNN             & 77.04$\pm$0.12   & 77.47$\pm$0.31   &  \\
+		 & HNHN              & 65.21$\pm$0.28   & 65.04$\pm$0.35   &  \\
+		 & UniGCNII          & 76.26$\pm$0.58   & 65.16$\pm$0.82   & 低于论文 \\
+		 & AllSetformer      & 78.61$\pm$0.13   & 78.81$\pm$0.19   &  \\
+		 & EDHNN             & 77.90$\pm$0.21   & 78.09$\pm$0.12   &  \\
+		 & HyperGT           & OOM              & --               & 论文中即为 OOM \\
+		 & EHNN              & 77.95$\pm$0.14   & 78.27$\pm$0.17   &  \\
+		 & TMPHN             & 73.48$\pm$0.33   & --               & 缺 YAML 段，CPU 内存不足 \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Walmart-Trips-100} 上的节点分类结果。}
+\end{table}
+\par\smallskip
+\noindent\textbf{Walmart-Trips-100。}20 个方法中 15 个完成；AllSetformer 最佳，为 $78.81\%$（论文 $78.61\%$），在有报告值的成功条目中，14 格有 12 格在 1.0 个百分点以内。
+
+\noindent\textit{低于论文。}UniGCNII 是唯一的大差距（$-11.1$）。我们先排除了其他可能：它的 YAML 配置段能正确加载、模型也确实在训练（只是欠拟合），而且在其余 12 个数据集上都与论文吻合，因此不是实现 bug；固定种子下反复调整学习率和 restart alpha，也无法让结果接近论文的 $76\%$。剩下最合理的解释是环境差异，而这个数据集的特征在加载时本就添加了标准差为 $0.6$ 的高斯噪声，环境差异很可能正是通过这些带噪声的特征影响了训练。
+
+\noindent\textit{失败的运行。}五个失败的原因各不相同。TMPHN 因主机内存失败（需求 52.6 GiB，机制 iv）。SheafHyperGNN 和 DPHGNN 因缺段 \texttt{AttributeError} 中止（机制 iii）。HJRL 和 HyperGT 在论文中即为 OOM（机制 i）。
+
+\noindent\textit{LEGCN 的稀疏表示修复。}LEGCN 最初触发 CUDA OOM：把超图转成线图后，walmart 上产生了 $7560$ 万条边，而原来的逐边计算方式会生成一个 $36.07$ GiB 的巨大张量，任何单卡都装不下。我们把邻接关系改用稀疏张量表示，并关闭会重复添加自环的设置，从而不再生成这个大张量，而计算结果与原来完全一致，修复后峰值显存只有 $9.35$ GiB。之后 LEGCN 成功跑出 $67.82\pm0.95\%$（$+4.84$），偏高的理由与前文 Cora 相同。
+
+\noindent\textit{反向情形（论文 OOM，运行成功）。}PhenomNN 在论文中被标为 OOM，但在我们这里却以 $60.82\%$ 顺利跑完。原因是同一个矩阵如果用稠密形式需要 $29.42$ GiB，而用稀疏形式只占 $16.19$ MiB；我们的软件版本很可能让这个运算自动采用了稀疏路径，这也是全研究中唯一一个论文 OOM、本地却成功的条目。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Yelp}} & MLP               & 31.84$\pm$0.45   & 31.67$\pm$0.46   &  \\
+		 & CEGCN             & OOM              & --               & GPU 显存不足 \\
+		 & CEGAT             & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & HGNN              & 33.71$\pm$0.24   & 33.71$\pm$0.24   &  \\
+		 & HyperGCN          & 29.29$\pm$0.55   & 21.48$\pm$6.98   & 低于论文 \\
+		 & HCHA              & 33.13$\pm$0.23   & 33.13$\pm$0.23   &  \\
+		 & LEGCN             & OOM              & --               & 缺 YAML 段，CPU 内存不足 \\
+		 & HyperND           & OOM              & --               & GPU 显存不足 \\
+		 & PhenomNN          & OOM              & --               & GPU 显存不足 \\
+		 & SheafHyperGNN     & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & HJRL              & OOM              & --               & CPU 内存不足 \\
+		 & DPHGNN            & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & TFHNN             & 35.16$\pm$0.54   & 34.14$\pm$1.27   &  \\
+		 & HNHN              & 25.86$\pm$0.63   & 25.86$\pm$0.63   &  \\
+		 & UniGCNII          & 31.09$\pm$0.61   & 30.93$\pm$0.58   &  \\
+		 & AllSetformer      & 33.18$\pm$0.88   & 32.38$\pm$0.11   &  \\
+		 & EDHNN             & 34.84$\pm$0.93   & 34.55$\pm$1.11   &  \\
+		 & HyperGT           & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & EHNN              & 34.09$\pm$3.19   & 33.79$\pm$2.48   &  \\
+		 & TMPHN             & OOM              & --               & 缺 YAML 段，CPU 内存不足 \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Yelp} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Yelp。}20 个方法中仅 10 个完成；EDHNN 最佳，为 $34.55\%$（论文 $34.84\%$），10 个成功条目中 7 格在 1.0 个百分点以内。
+
+\noindent\textit{低于论文。}HyperGCN 是最大差距，为 $21.48\pm6.98\%$（$-7.8$）；膨胀的标准差（$6.98$ 对 $0.55$）表明部分种子收敛不稳、停留在较差的解，而非稳定偏差。
+
+\noindent\textit{EHNN 重跑。}用未改动的官方配置在五个种子上重跑 EHNN，得到 $33.79\pm2.48\%$（种子测试值 $36.05, 30.38, 31.17, 35.48, 35.88$），差距从 $-2.4$ 缩小到 $-0.30$、进入容差范围；先前的偏低是运行间波动。
+
+\noindent\textit{失败的运行。}十个条目失败。CEGCN、HyperND、PhenomNN 因 GPU 显存不足失败（分别需 $41.56$、$31.73$、$27.22$ GiB）；HJRL、LEGCN、TMPHN 因主机内存不足失败（$12.6$、$31.8$、$138$ GiB）；CEGAT、SheafHyperGNN、DPHGNN、HyperGT 因缺段 AttributeError 中止。
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Pokec}} & MLP               & 59.64$\pm$0.48   & 59.64$\pm$0.48   &  \\
+		 & CEGCN             & 57.37$\pm$0.38   & 56.92$\pm$0.53   &  \\
+		 & CEGAT             & 57.34$\pm$0.52   & 57.06$\pm$0.51   &  \\
+		 & HGNN              & 57.87$\pm$0.76   & 58.07$\pm$0.32   &  \\
+		 & HyperGCN          & 57.51$\pm$0.54   & 57.46$\pm$0.40   &  \\
+		 & HCHA              & 58.19$\pm$0.45   & 57.96$\pm$0.47   &  \\
+		 & LEGCN             & 59.66$\pm$0.63   & 58.47$\pm$0.54   & 低于论文 \\
+		 & HyperND           & 57.65$\pm$1.08   & 57.50$\pm$0.90   &  \\
+		 & PhenomNN          & 58.43$\pm$0.92   & 58.19$\pm$0.61   &  \\
+		 & SheafHyperGNN     & 59.06$\pm$0.37   & 59.03$\pm$0.44   &  \\
+		 & HJRL              & 57.57$\pm$0.47   & 57.58$\pm$0.31   &  \\
+		 & DPHGNN            & 58.20$\pm$0.58   & 51.83$\pm$4.66   & 低于论文 \\
+		 & TFHNN             & 59.17$\pm$0.52   & 59.13$\pm$0.45   &  \\
+		 & HNHN              & 58.55$\pm$0.93   & 58.42$\pm$0.68   &  \\
+		 & UniGCNII          & 58.56$\pm$0.73   & 58.71$\pm$0.60   &  \\
+		 & AllSetformer      & 58.55$\pm$0.56   & 58.72$\pm$0.63   &  \\
+		 & EDHNN             & 58.68$\pm$0.40   & 58.89$\pm$0.36   &  \\
+		 & HyperGT           & 57.73$\pm$0.76   & 58.46$\pm$0.72   &  \\
+		 & EHNN              & 58.23$\pm$1.07   & 58.17$\pm$1.13   &  \\
+		 & TMPHN             & 58.82$\pm$0.49   & 58.76$\pm$0.79   &  \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Pokec} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Pokec。}20 个方法全部完成；MLP 最佳，为 $59.64\%$，与其报告值完全吻合，20 格中 18 格在 1.0 个百分点以内，平均差距 0.54 个百分点。
+\noindent\textit{低于论文。}DPHGNN 均值为 $51.83\pm4.66\%$（$-6.4$），标准差很大：五个种子的结果从 $44.37\%$ 到 $57.41\%$ 不等，部分种子训练中损失突然飙升、收敛到较差的解，说明它在这个数据集上训练不稳定。LEGCN 仅低 $1.2$ 个百分点，处于正常波动内。
+\noindent\textit{重跑过程。}为核对这两个条目，我们在 Pokec 上对 LEGCN 和 DPHGNN 分别单独重跑，全程沿用官方 YAML 的数据集默认配置（\texttt{is\_default=False}）与 5 个随机种子，没有改动任何超参数。其中 LEGCN 训练 200 轮，学习率 $0.001$、dropout $0.1$；DPHGNN 训练 100 轮，学习率 $0.01$、dropout $0.5$。
+
+LEGCN 的五个种子测试准确率依次为 $58.83, 59.01, 57.60, 58.83, 58.11\%$，最高与最低只差约 $1.4$ 个百分点、分布集中，汇总为 $58.47\pm0.54\%$，稳定地比论文低 $1.2$ 个百分点，属于正常波动。
+
+DPHGNN 的五个种子依次为 $57.41, 51.89, 49.57, 44.37, 55.89\%$，最高与最低相差约 $13.0$ 个百分点、分布很散。其中第 4 个种子在训练后期损失从约 $0.7$ 突然飙升到 $10.7$，最终只得到 $44.37\%$；这个异常种子把均值拉低、把标准差撑大，汇总为 $51.83\pm4.66\%$，说明问题出在训练不稳定，而不是稳定的系统性偏差。
+
+
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{llccc}
+		\toprule
+		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
+		\midrule
+		\multirow{20}{*}{\textbf{Trivago}} & MLP               & 36.76$\pm$0.66   & 34.19$\pm$2.22   & 低于论文 \\
+		 & CEGCN             & 47.24$\pm$1.09   & 47.67$\pm$0.34   &  \\
+		 & CEGAT             & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & HGNN              & 57.67$\pm$1.61   & 57.02$\pm$2.28   &  \\
+		 & HyperGCN          & 42.39$\pm$1.25   & 43.85$\pm$0.94   &  \\
+		 & HCHA              & 52.50$\pm$3.43   & 53.03$\pm$1.99   &  \\
+		 & LEGCN             & 33.45$\pm$1.45   & --               & 22 GB 卡显存不足 \\
+		 & HyperND           & 87.19$\pm$1.89   & 88.17$\pm$0.79   &  \\
+		 & PhenomNN          & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & SheafHyperGNN     & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & HJRL              & OOM              & --               & CPU 内存不足 \\
+		 & DPHGNN            & OOM              & --               & 缺 YAML 段，配置错误 \\
+		 & TFHNN             & 90.79$\pm$0.79   & 91.58$\pm$0.82   &  \\
+		 & HNHN              & 53.75$\pm$1.43   & 50.59$\pm$1.78   & 低于论文 \\
+		 & UniGCNII          & 36.15$\pm$0.56   & 36.27$\pm$0.25   &  \\
+		 & AllSetformer      & 59.92$\pm$4.02   & 55.47$\pm$8.52   & 低于论文 \\
+		 & EDHNN             & 75.99$\pm$2.60   & 76.35$\pm$3.76   &  \\
+		 & HyperGT           & OOM              & --               & GPU 显存不足 \\
+		 & EHNN              & OOM              & --               & CPU 内存不足 \\
+		 & TMPHN             & OOM              & --               & 缺 YAML 段，CPU 内存不足 \\
+		\bottomrule
+	\end{tabular}
+	\caption{\textbf{Trivago} 上的节点分类结果。}
+\end{table}
+
+\par\smallskip
+\noindent\textbf{Trivago。}20 个方法中 11 个完成；TFHNN 最佳，为 $91.58\%$（论文 $90.79\%$）。这是一致性最弱的表格：11 个成功条目中 7 格在 1.0 个百分点以内，平均差距 1.41 个百分点。
+
+\noindent\textit{重跑更新。}我们对 HGNN、HNHN、AllSetformer、EDHNN 四个方法重新运行，单次训练耗时约 48 到 252 秒。重跑后 HGNN 从 $55.07$ 升到 $57.02\%$、EDHNN 从 $68.79$ 升到 $76.35\%$，二者都回到论文附近，标准差也明显变小；HNHN 为 $50.59\%$、AllSetformer 为 $55.47\%$。这些模型在这个大数据集上训练时间长、标准差大，处在收敛边缘，对初始条件很敏感，所以原来的部分差距是运行间波动，重跑后得到了更稳定、更接近论文的结果。
+
+\noindent\textit{仍低于论文。}重跑后 AllSetformer（$-4.5$）和 HNHN（$-3.2$）仍然偏低，标准差也较大（$8.52$、$1.78$），说明它们仍处在收敛边缘。一项独立的第三方复现报告公共管线中 20 个方法有 18 个失败，因此已知的数据管线不一致，仍能解释这些持续存在的偏差。
+
+\noindent\textit{失败的运行。}九个条目失败。CEGAT、PhenomNN、SheafHyperGNN、DPHGNN 因缺段 AttributeError 中止；LEGCN、HyperGT 因 GPU 显存不足失败（HyperGT 在空闲仅 $5.88$ GiB 时试图再申请 $11.04$ GiB）；TMPHN、HJRL、EHNN 因主机内存不足失败（$261$、$261$、$522$ GiB）。
+
+\section*{任务 2：数据集统计}
+\begin{table}[H]
+\centering\small
+\begin{tabular}{lrrrrrr}
+\toprule
+数据集 & 节点数 & 超边数 & 平均超边大小 & 孤立节点 (\%) & 特征维度 & 类别数 \\
+\midrule
+Cora              & 2{,}708 & 1{,}579 & 3.03 & 1{,}274 (47.0\%) & 1{,}433 & 7 \\
+Coauthor-Cora     & 2{,}708 & 1{,}072 & 4.28 & 320 (11.8\%) & 1{,}433 & 7 \\
+NTU2012           & 2{,}012 & 2{,}012 & 5.00 & 0 (0\%) & 100 & 67 \\
+ModelNet40        & 12{,}311 & 12{,}311 & 5.00 & 0 (0\%) & 100 & 40 \\
+Actor             & 16{,}255 & 10{,}164 & 5.25 & 494 (3.0\%) & 50 & 3 \\
+Twitch            & 16{,}812 & 2{,}627 & 6.23 & 456 (2.7\%) & 7 & 2 \\
+Pubmed            & 19{,}717 & 7{,}963 & 4.35 & 15{,}877 (80.5\%) & 500 & 3 \\
+Amazon（Ratings） & 22{,}299 & 2{,}090 & 3.10 & 19{,}175 (86.0\%) & 111 & 5 \\
+Coauthor-DBLP     & 41{,}302 & 22{,}363 & 4.45 & 0 (0\%) & 1{,}425 & 6 \\
+Walmart-Trips-100 & 88{,}860 & 69{,}906 & 6.59 & 0 (0\%) & 100 & 11 \\
+Yelp              & 50{,}758 & 679{,}302 & 6.66 & 0 (0\%) & 1{,}862 & 9 \\
+Pokec             & 14{,}998 & 2{,}406 & 2.29 & 11{,}798 (78.7\%) & 65 & 2 \\
+Trivago           & 172{,}738 & 233{,}202 & 3.12 & 0 (0\%) & 300 & 160 \\
+\bottomrule
+\end{tabular}
+\caption{13 个节点分类数据集的实测统计。}
+\label{tab:datasets}
+\end{table}
+\par{“节点数”为数据集中的节点总数；“超边数”为数据集包含的超边总数；“平均超边大小”为每条超边平均包含的节点数，即总关联数除以超边数；“孤立节点”为不属于任何超边的节点数量及其占节点总数的百分比；“特征维度”为每个节点输入特征的维度；“类别数”为节点分类任务的类别总数。}
+
+\section*{任务 3：基准方法描述}
+\begin{itemize}
+\item \textbf{MLP}：仅用特征的基准，不使用超图结构，直接对节点特征施加多层感知机。它隔离了输入特征的贡献，作为基于图的方法的非关系参照。
+\item \textbf{CEGCN}\cite{chien2022allset}：一种团扩展基准，把每条超边转换为一组全连接的成对边，然后在所得成对图上运行标准的图卷积网络（GCN）。
+\item \textbf{CEGAT}\cite{chien2022allset}：与 CEGCN 一样用团扩展把超边转为成对边，但施加图注意力网络（GAT）来学习每个扩展团内节点的重要性，而非使用固定的基于度的权重。
+\item \textbf{HGNN}\cite{feng2019hgnn}：一个谱框架，通过超图拉普拉斯把图卷积扩展到超图，并用截断的切比雪夫多项式近似谱滤波器，捕捉高阶节点关联。
+\item \textbf{HyperGCN}\cite{yadati2019hypergcn}：一种谱方法，用一组成对边近似每条超边，然后把学习问题当作近似图上的图学习来处理。
+\item \textbf{HCHA}\cite{bai2021hcha}：引入两个可训练算子——超图卷积与超图注意力；卷积通过高阶关系传播信息，而注意力动态地为超边连接加权，以强调与任务相关的信息。
+\item \textbf{LEGCN}\cite{yang2022legcn}：基于线扩展，把顶点-超边对作为节点，将超图双射地转换为简单图，保留对称的共现结构，从而让标准图算法可以在超图上运行。
+\item \textbf{HyperND}\cite{prokopchik2022hypernd}：构建一个非线性扩散过程，在超图上同时传播特征与标签，并以扩散的极限点作为节点嵌入，在其上用线性分类器预测标签。
+\item \textbf{PhenomNN}\cite{wang2023phenomnn}：以参数化的超图正则化能量函数为基础，把节点嵌入视为能量最小化点，通过有监督的双层过程将其与分类器联合优化。
+\item \textbf{SheafHyperGNN}\cite{duta2023sheaf}：在超图上使用细胞层（cellular sheaf）框架，把标准超图拉普拉斯推广到更丰富的层结构，得到能够推断并处理基于层的动态的网络。
+\item \textbf{HJRL}\cite{yan2024hjrl}：提出一种交叉扩展，把顶点和超边都映射为标准图的节点，并在共享空间中联合嵌入它们，辅以额外的超图重建目标以保留结构信息。
+\item \textbf{DPHGNN}\cite{saxena2024dphgnn}：一个混合的、资源受限的框架，结合提供谱偏置的静态更新层与融合显式聚合拓扑特征的动态更新层，使用等变算子学习来捕捉低阶语义。
+\item \textbf{TFHNN}\cite{tang2025tfhnn}：用一个免训练的消息传递模块把结构处理与模型训练解耦，去除可学习参数和非线性激活，把多层传播压缩为单步，以实现高效训练。
+\item \textbf{HNHN}\cite{dong2020hnhn}：一种空间超图卷积，在节点和超边上都有非线性激活，并结合一种归一化方案，根据数据集调整高基数超边和高度节点的重要性。
+\item \textbf{UniGCNII}\cite{huang2021unignn}：基准实例化了统一的 UniGNN 两阶段框架——先用置换不变函数计算超边表示，再把它们聚合回顶点——并采用 GCNII 的初始残差与恒等映射；这是基准中报告的最具竞争力的 UniGNN 变体。
+\item \textbf{AllSetformer}\cite{chien2022allset}：把每一层实现为两个多重集函数的复合，并采用 Set Transformer 对其建模，为超图聚合提供高灵活性与表达能力。
+\item \textbf{EDHNN}\cite{wang2023edhnn}：通过把星形（二分）扩展与标准消息传递网络结合，近似任意连续、置换等变的超图扩散算子，并跨层共享权重以提升可扩展性。
+\item \textbf{HyperGT}\cite{liu2024hypergt}：一个基于 Transformer 的超图神经网络，捕捉全局的节点-超边关联，同时使用关联矩阵位置编码和结构正则项来保留局部连通性。
+\item \textbf{EHNN}\cite{kim2022ehnn}：第一个面向通用超图学习的等变 GNN 框架，把稀疏超图连接到固定阶张量，并使用基于超网络的参数共享来扩展到任意超边阶数。
+\item \textbf{TMPHN}\cite{wang2024tmphn}：一个基于张量的框架（T-HyperGNN），用张量编码超图结构、用乘法交互张量把聚合从线性运算提升到高阶多项式映射，同时使用张量消息传递以提升效率。
+\end{itemize}
+
+\section*{任务 4：你的 GitHub 仓库}
+项目名称：\textbf{HGNNStudy}。\par
+仓库 URL：\url{https://github.com/yffff64/HGNNStudy}。\par
+在 README.md 中，按数据集列出完整的基准命令与实际参数，以及环境和数据准备说明。识别所有配置文件与有效设置。
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+\end{document}

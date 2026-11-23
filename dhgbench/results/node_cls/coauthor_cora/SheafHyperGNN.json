@@ -1,0 +1,131 @@
+{
+  "task": "node_cls",
+  "dataset": "coauthor_cora",
+  "method": "SheafHyperGNN",
+  "num_seeds": 5,
+  "metrics": {
+    "acc": [
+      [
+        99.11373138427734,
+        85.67208099365234,
+        83.60413360595703
+      ],
+      [
+        99.3353042602539,
+        83.8995590209961,
+        83.60413360595703
+      ],
+      [
+        99.11373138427734,
+        83.8995590209961,
+        82.86558532714844
+      ],
+      [
+        98.52289581298828,
+        86.26292419433594,
+        83.01329040527344
+      ],
+      [
+        98.52289581298828,
+        83.60413360595703,
+        84.78582000732422
+      ]
+    ]
+  },
+  "config": {
+    "use_bench_prop": true,
+    "train_prop": 0.5,
+    "valid_prop": 0.25,
+    "dname": "coauthor_cora",
+    "task_type": "node_cls",
+    "is_default": false,
+    "use_processed": true,
+    "method": "SheafHyperGNN",
+    "device": "cuda:0",
+    "num_seeds": 5,
+    "epochs": 15,
+    "dropout": 0.5,
+    "lr": 0.001,
+    "wd": 0,
+    "clip_grad": false,
+    "clip_thresh": 5.0,
+    "num_splits": 10,
+    "mem_verbose": true,
+    "mem_display_step": 100,
+    "display_step": 20,
+    "eval_verbose": true,
+    "result_dir": "./results",
+    "embedding_mode": false,
+    "embedding_hidden": 128,
+    "normtype": "all_one",
+    "add_self_loop": true,
+    "exclude_self": false,
+    "edge_split_mode": "ind",
+    "edge_pred_protocol": "legacy",
+    "edge_save_dir": "./lib_edge_splits/",
+    "edge_batch_size": 512,
+    "e_embed_hidden": 64,
+    "e_embed_layer": 2,
+    "e_embed_dropout": 0.2,
+    "e_embed_norm": "ln",
+    "aggr_mode": "max",
+    "ns_method": "mixed",
+    "edge_aggr": "group",
+    "hg_batch_size": 256,
+    "pooling": "mean",
+    "g_embed_hidden": 128,
+    "g_embed_layer": 2,
+    "g_embed_dropout": 0.2,
+    "g_embed_norm": "ln",
+    "use_weighted_loss": false,
+    "early_stop": false,
+    "is_perturbed": false,
+    "is_poison": true,
+    "pert_mode": "spar_label",
+    "pert_p": 0.0,
+    "feature_noise": "0.6",
+    "All_num_layers": 4,
+    "MLP_hidden": 256,
+    "init_hedge": "avg",
+    "sheaf_normtype": "sym_degree_norm",
+    "sheaf_act": "sigmoid",
+    "sheaf_dropout": false,
+    "sheaf_left_proj": false,
+    "dynamic_sheaf": true,
+    "sheaf_special_head": false,
+    "sheaf_pred_block": "MLP_var1",
+    "sheaf_transformer_head": 1,
+    "stalk_dim": 4,
+    "AllSet_input_norm": true,
+    "residual_sheaf": false
+  },
+  "summary": {
+    "acc": [
+      83.57459259033203,
+      0.6762497528399579
+    ]
+  },
+  "train_time": 0.7359814643859863,
+  "histories": [
+    {
+      "seed": 0,
+      "history": []
+    },
+    {
+      "seed": 1,
+      "history": []
+    },
+    {
+      "seed": 2,
+      "history": []
+    },
+    {
+      "seed": 3,
+      "history": []
+    },
+    {
+      "seed": 4,
+      "history": []
+    }
+  ]
+}
