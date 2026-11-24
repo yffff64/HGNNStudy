@@ -856,146 +856,24 @@ Besides adding the reproduction results, the `study_notes/` folder and this READ
 - `dhgbench/lib_yamls/node_yamls/config_hjrl.yaml` and `config_unigin.yaml`: fill in missing per-dataset YAML sections so the affected methods load a valid configuration.
 
 ## 7. Citation
-
-```bibtex
-@inproceedings{li2026dhg,
-  title={DHG-bench: A comprehensive benchmark for deep hypergraph learning},
-  author={Li, Fan and Wang, Xiaoyang and Zhang, Wenjie and Zhang, Ying and Lin, Xuemin},
-  booktitle={International Conference on Learning Representations},
-  volume={2026}, pages={47693--47727}, year={2026}
-}
-@inproceedings{feng2019hgnn,
-  title     = {Hypergraph Neural Networks},
-  author    = {Feng, Yifan and You, Haoxuan and Zhang, Zizhao and Ji, Rongrong and Gao, Yue},
-  booktitle = {AAAI Conference on Artificial Intelligence},
-  volume    = {33},
-  pages     = {3558--3565},
-  year      = {2019}
-}
-
-@inproceedings{yadati2019hypergcn,
-  title     = {{HyperGCN}: A New Method for Training Graph Convolutional Networks on Hypergraphs},
-  author    = {Yadati, Naganand and Nimishakavi, Madhav and Yadav, Prateek and Louis, Anand and Talukdar, Partha},
-  booktitle = {Advances in Neural Information Processing Systems},
-  volume    = {32},
-  year      = {2019}
-}
-
-@article{bai2021hcha,
-  title     = {Hypergraph Convolution and Hypergraph Attention},
-  author    = {Bai, Song and Zhang, Feihu and Torr, Philip H. S.},
-  journal   = {Pattern Recognition},
-  volume    = {110},
-  pages     = {107637},
-  year      = {2021}
-}
-
-@inproceedings{yang2022legcn,
-  title     = {Semi-supervised Hypergraph Node Classification on Hypergraph Line Expansion},
-  author    = {Yang, Chaoqi and Wang, Ruijie and Yao, Shuochao and Abdelzaher, Tarek},
-  booktitle = {ACM International Conference on Information and Knowledge Management},
-  pages     = {2352--2361},
-  year      = {2022}
-}
-
-@inproceedings{prokopchik2022hypernd,
-  title     = {Nonlinear Feature Diffusion on Hypergraphs},
-  author    = {Prokopchik, Konstantin and Benson, Austin R. and Tudisco, Francesco},
-  booktitle = {International Conference on Machine Learning},
-  pages     = {17945--17958},
-  year      = {2022}
-}
-
-@inproceedings{wang2023phenomnn,
-  title     = {From Hypergraph Energy Functions to Hypergraph Neural Networks},
-  author    = {Wang, Yuxin and Gan, Quan and Qiu, Xipeng and Wipf, David},
-  booktitle = {International Conference on Machine Learning},
-  pages     = {35605--35623},
-  year      = {2023}
-}
-
-@inproceedings{duta2023sheaf,
-  title     = {Sheaf Hypergraph Networks},
-  author    = {Duta, Iulia and Cassar{\`a}, Giulia and Silvestri, Fabrizio and Li{\`o}, Pietro},
-  booktitle = {Advances in Neural Information Processing Systems},
-  volume    = {36},
-  pages     = {12087--12099},
-  year      = {2023}
-}
-
-@inproceedings{yan2024hjrl,
-  title     = {Hypergraph Joint Representation Learning for Hypervertices and Hyperedges via Cross Expansion},
-  author    = {Yan, Yuguang and Chen, Yuanlin and Wang, Shibo and Wu, Hanrui and Cai, Ruichu},
-  booktitle = {AAAI Conference on Artificial Intelligence},
-  volume    = {38},
-  pages     = {9232--9240},
-  year      = {2024}
-}
-
-@inproceedings{saxena2024dphgnn,
-  title     = {{DPHGNN}: A Dual Perspective Hypergraph Neural Network},
-  author    = {Saxena, Siddhant and Ghatak, Shounak and Kolla, Raghu and Mukherjee, Debashis and Chakraborty, Tanmoy},
-  booktitle = {ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
-  pages     = {2548--2559},
-  year      = {2024}
-}
-
-@inproceedings{tang2025tfhnn,
-  title     = {Training-free Message Passing for Learning on Graphs},
-  author    = {Tang, Bohan and Liu, Zexi and Jiang, Keyue and Chen, Sheng and Dong, Xiaowen},
-  booktitle = {International Conference on Learning Representations},
-  year      = {2025}
-}
-
-@inproceedings{dong2020hnhn,
-  title     = {{HNHN}: Hypergraph Networks with Hyperedge Neurons},
-  author    = {Dong, Yihe and Sawin, Will and Bengio, Yoshua},
-  booktitle = {ICML Workshop on Graph Representation Learning and Beyond},
-  year      = {2020}
-}
-
-@inproceedings{huang2021unignn,
-  title     = {{UniGNN}: A Unified Framework for Graph and Hypergraph Neural Networks},
-  author    = {Huang, Jing and Yang, Jie},
-  booktitle = {International Joint Conference on Artificial Intelligence},
-  year      = {2021}
-}
-
-@inproceedings{chien2022allset,
-  title     = {You Are {AllSet}: A Multiset Function Framework for Hypergraph Neural Networks},
-  author    = {Chien, Eli and Pan, Chao and Peng, Jianhao and Milenkovic, Olgica},
-  booktitle = {International Conference on Learning Representations},
-  year      = {2022}
-}
-
-@inproceedings{wang2023edhnn,
-  title     = {Equivariant Hypergraph Diffusion Neural Operators},
-  author    = {Wang, Peihao and Yang, Shenghao and Liu, Yunyu and Wang, Zhangyang and Li, Pan},
-  booktitle = {International Conference on Learning Representations},
-  year      = {2023}
-}
-
-@inproceedings{liu2024hypergt,
-  title     = {Hypergraph Transformer for Semi-supervised Classification},
-  author    = {Liu, Zexi and Tang, Bohan and Ye, Ziyuan and Dong, Xiaowen and Chen, Siheng and Wang, Yanfeng},
-  booktitle = {IEEE International Conference on Acoustics, Speech and Signal Processing},
-  pages     = {7515--7519},
-  year      = {2024}
-}
-
-@inproceedings{kim2022ehnn,
-  title     = {Equivariant Hypergraph Neural Networks},
-  author    = {Kim, Jinwoo and Oh, Saeyoon and Cho, Sungjun and Hong, Seunghoon},
-  booktitle = {European Conference on Computer Vision},
-  pages     = {86--103},
-  year      = {2022}
-}
-
-@article{wang2024tmphn,
-  title     = {{T-HyperGNNs}: Hypergraph Neural Networks via Tensor Representations},
-  author    = {Wang, Fuli and Pena-Pena, Karelia and Qian, Wei and Arce, Gonzalo R.},
-  journal   = {IEEE Transactions on Neural Networks and Learning Systems},
-  year      = {2024}
-}
+| **ID** | **Method** | **Paper** |     **Venue**     |  
+| :----: | :----: | :----: |:----: |  
+|1 | HGNN | [Hypergraph neural networks](https://cdn.aaai.org/ojs/4235/4235-13-7289-1-10-20190705.pdf) | AAAI 2019 | 
+|2|HyperGCN|[HyperGCN: A New Method of Training Graph Convolutional Networks on Hypergraphs](https://proceedings.neurips.cc/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf)|NeurIPS 2019| 
+|3| HNHN | [HNHN: Hypergraph Networks with Hyperedge Neurons](https://grlplus.github.io/papers/40.pdf) | ICML WS 2020 | 
+|4| HCHA | [Hypergraph convolution and hypergraph attention](https://www.sciencedirect.com/science/article/abs/pii/S0031320320304404?via=ihub) | PR 2020 | 
+|5| UniGNN | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://www.ijcai.org/proceedings/2021/0353.pdf) | IJCAI 2021 | 
+|6| AllSetformer | [You are AllSet: A Multiset Function Framework for Hypergraph Neural Networks](https://openreview.net/forum?id=hpBTIv2uy_E) | ICLR 2022 | 
+|7|HyperND|[Nonlinear Feature Diffusion on Hypergraphs](https://proceedings.mlr.press/v162/prokopchik22a/prokopchik22a.pdf)|ICML 2022|
+|8| EHNN|[Equivariant hypergraph neural networks](https://arxiv.org/pdf/2208.10428)|ECCV 2022|Y|Y|
+|9| LEGCN|[Semi-supervised Hypergraph Node Classification on Hypergraph Line Expansion](https://arxiv.org/pdf/2005.04843)|CIKM 2022|
+|10| ED-HNN | [Equivariant Hypergraph Diffusion Neural Operators](https://openreview.net/forum?id=RiTjKoscnNd) | ICLR 2023 | 
+|11|PhenomNN|[From Hypergraph Energy Functions to Hypergraph Neural Networks](https://proceedings.mlr.press/v202/wang23d/wang23d.pdf)|ICML 2023|
+|12|SheafHyperGNN|[Sheaf Hypergraph Networks](https://proceedings.neurips.cc/paper_files/paper/2023/file/27f243af2887d7f248f518d9b967a882-Paper-Conference.pdf)|NeurIPS 2023|
+|13|HJRL|[Hypergraph Joint Representation Learning for Hypervertices and Hyperedges via Cross Expansion](https://openreview.net/forum?id=fxLaL5s6UH)|AAAI 2024|
+|14| DPHGNN |[DPHGNN: A Dual Perspective Hypergraph Neural Networks](https://arxiv.org/pdf/2405.16616)|KDD 2024| 
+|15|T-HyperGNNs |[T-HyperGNNs: Hypergraph Neural Networks via Tensor Representations](https://ieeexplore.ieee.org/document/10462516)| TNNLS 2024|
+|16|HyperGT|[Hypergraph Transformer for Semi-Supervised Classification](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10446248)|ICASSP 2024|
+|17|TF-HNN |[Training-Free Message Passing for Learning on Hypergraphs](https://openreview.net/pdf?id=4AuyYxt7A2)| ICLR 2025|
 
 ```
