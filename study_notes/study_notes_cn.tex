@@ -30,6 +30,8 @@
 (iii)~\textit{缺少配置段}——YAML 里没有这个数据集对应的段落，程序运行时抛出 \texttt{AttributeError} 中止；
 (iv)~\textit{主机内存 OOM}——预处理所需内存超出机器的可用容量。
 
+\noindent\textbf{标注说明：}任务 1 的每个表格均对“论文”与“复现”两列分别排名：\textcolor{red}{红色}表示该列数值最优秀的结果，\underline{下划线}表示该列第二优秀的结果；标注为 OOM 或“--”的组合未能成功运行，不参与排名。
+
 \begin{table}[H]
 	\centering\small
 	\begin{tabular}{llccc}
@@ -48,9 +50,9 @@
 		 & SheafHyperGNN     & 79.03$\pm$0.90   & 78.85$\pm$0.86   &  \\
 		 & HJRL              & 78.67$\pm$1.47   & 78.70$\pm$1.63   &  \\
 		 & DPHGNN            & 76.40$\pm$1.36   & 75.86$\pm$1.29   &  \\
-		 & TFHNN             & 79.47$\pm$1.31   & 79.70$\pm$1.52   &  \\
+		 & TFHNN             & \textcolor{red}{79.47$\pm$1.31}   & \textcolor{red}{79.70$\pm$1.52}   &  \\
 		 & HNHN              & 75.24$\pm$1.38   & 75.27$\pm$1.37   &  \\
-		 & UniGCNII          & 79.41$\pm$1.24   & 79.29$\pm$1.07   &  \\
+		 & UniGCNII          & \underline{79.41$\pm$1.24}   & \underline{79.29$\pm$1.07}   &  \\
 		 & AllSetformer      & 78.02$\pm$1.43   & 78.02$\pm$1.98   &  \\
 		 & EDHNN             & 78.58$\pm$0.52   & 78.02$\pm$1.41   &  \\
 		 & HyperGT           & 75.57$\pm$1.11   & 75.07$\pm$0.98   &  \\
@@ -80,13 +82,13 @@
 		 & HCHA              & 83.01$\pm$0.58   & 82.92$\pm$0.75   &  \\
 		 & LEGCN             & 74.59$\pm$1.04   & 82.95$\pm$0.79   & 高于论文 \\
 		 & HyperND           & 83.19$\pm$0.71   & 83.10$\pm$0.80   &  \\
-		 & PhenomNN          & 84.05$\pm$1.05   & 83.87$\pm$0.53   &  \\
-		 & SheafHyperGNN     & 84.08$\pm$0.50   & 83.57$\pm$0.68   &  \\
+		 & PhenomNN          & 84.05$\pm$1.05   & \underline{83.87$\pm$0.53}   &  \\
+		 & SheafHyperGNN     & \underline{84.08$\pm$0.50}   & 83.57$\pm$0.68   &  \\
 		 & HJRL              & 83.72$\pm$0.74   & 83.52$\pm$0.71   &  \\
 		 & DPHGNN            & 82.13$\pm$1.13   & 81.42$\pm$0.38   &  \\
-		 & TFHNN             & 84.19$\pm$0.89   & 84.11$\pm$0.62   &  \\
+		 & TFHNN             & \textcolor{red}{84.19$\pm$0.89}   & \textcolor{red}{84.11$\pm$0.62}   &  \\
 		 & HNHN              & 76.51$\pm$1.34   & 76.40$\pm$1.33   &  \\
-		 & UniGCNII          & 83.49$\pm$1.58   & 83.87$\pm$0.89   &  \\
+		 & UniGCNII          & 83.49$\pm$1.58   & \underline{83.87$\pm$0.89}   &  \\
 		 & AllSetformer      & 82.95$\pm$0.62   & 82.90$\pm$0.76   &  \\
 		 & EDHNN             & 82.98$\pm$0.93   & 81.89$\pm$0.75   &  \\
 		 & HyperGT           & 75.42$\pm$0.62   & 75.57$\pm$1.04   &  \\
@@ -116,17 +118,17 @@
 		 & HGNN              & 90.13$\pm$0.89   & 90.14$\pm$0.89   &  \\
 		 & HyperGCN          & 75.78$\pm$4.82   & 75.83$\pm$4.83   &  \\
 		 & HCHA              & 90.53$\pm$1.00   & 90.54$\pm$1.00   &  \\
-		 & LEGCN             & 89.82$\pm$0.91   & 91.17$\pm$0.62   &  \\
+		 & LEGCN             & 89.82$\pm$0.91   & \underline{91.17$\pm$0.62}   &  \\
 		 & HyperND           & 88.98$\pm$1.56   & 88.67$\pm$1.61   &  \\
 		 & PhenomNN          & 88.78$\pm$0.67   & 88.71$\pm$0.81   &  \\
 		 & SheafHyperGNN     & 90.81$\pm$0.58   & 90.78$\pm$0.57   &  \\
 		 & HJRL              & 88.15$\pm$1.18   & 88.31$\pm$0.93   &  \\
 		 & DPHGNN            & 84.77$\pm$1.06   & 84.77$\pm$1.44   &  \\
-		 & TFHNN             & 91.69$\pm$0.75   & 91.49$\pm$0.49   &  \\
+		 & TFHNN             & \textcolor{red}{91.69$\pm$0.75}   & \textcolor{red}{91.49$\pm$0.49}   &  \\
 		 & HNHN              & 87.27$\pm$1.53   & 87.20$\pm$1.56   &  \\
 		 & UniGCNII          & 89.86$\pm$0.44   & 90.26$\pm$0.56   &  \\
 		 & AllSetformer      & 90.17$\pm$1.03   & 89.86$\pm$0.71   &  \\
-		 & EDHNN             & 91.45$\pm$0.70   & 91.49$\pm$0.55   &  \\
+		 & EDHNN             & \underline{91.45$\pm$0.70}   & \textcolor{red}{91.49$\pm$0.55}   &  \\
 		 & HyperGT           & 86.00$\pm$2.05   & 86.80$\pm$2.34   &  \\
 		 & EHNN              & 87.99$\pm$0.39   & 87.55$\pm$0.70   &  \\
 		 & TMPHN             & 89.15$\pm$1.09   & 89.15$\pm$1.09   &  \\
@@ -158,11 +160,11 @@
 		 & SheafHyperGNN     & 98.30$\pm$0.19   & 98.24$\pm$0.26   &  \\
 		 & HJRL              & 96.33$\pm$0.30   & 96.32$\pm$0.39   &  \\
 		 & DPHGNN            & 97.19$\pm$0.17   & 97.04$\pm$0.12   &  \\
-		 & TFHNN             & 98.38$\pm$0.11   & 98.47$\pm$0.11   &  \\
+		 & TFHNN             & 98.38$\pm$0.11   & \textcolor{red}{98.47$\pm$0.11}   &  \\
 		 & HNHN              & 97.30$\pm$0.27   & 97.30$\pm$0.28   &  \\
-		 & UniGCNII          & 98.42$\pm$0.08   & 98.40$\pm$0.14   &  \\
+		 & UniGCNII          & \underline{98.42$\pm$0.08}   & 98.40$\pm$0.14   &  \\
 		 & AllSetformer      & 98.07$\pm$0.21   & 98.04$\pm$0.20   &  \\
-		 & EDHNN             & 98.51$\pm$0.15   & 98.44$\pm$0.10   &  \\
+		 & EDHNN             & \textcolor{red}{98.51$\pm$0.15}   & \underline{98.44$\pm$0.10}   &  \\
 		 & HyperGT           & 96.83$\pm$0.17   & 96.94$\pm$0.29   &  \\
 		 & EHNN              & 97.97$\pm$0.17   & 97.97$\pm$0.11   &  \\
 		 & TMPHN             & 97.76$\pm$0.34   & 97.78$\pm$0.14   &  \\
@@ -181,7 +183,7 @@
 		\toprule
 		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
 		\midrule
-		\multirow{20}{*}{\textbf{Actor}} & MLP               & 86.06$\pm$0.36   & 85.57$\pm$0.68   &  \\
+		\multirow{20}{*}{\textbf{Actor}} & MLP               & \underline{86.06$\pm$0.36}   & 85.57$\pm$0.68   &  \\
 		 & CEGCN             & 67.41$\pm$0.29   & 67.39$\pm$0.34   &  \\
 		 & CEGAT             & 73.87$\pm$0.83   & 73.64$\pm$0.78   &  \\
 		 & HGNN              & 77.83$\pm$0.37   & 77.83$\pm$0.37   &  \\
@@ -193,13 +195,13 @@
 		 & SheafHyperGNN     & 85.00$\pm$0.32   & 85.00$\pm$0.32   &  \\
 		 & HJRL              & 71.54$\pm$0.64   & 71.60$\pm$0.40   &  \\
 		 & DPHGNN            & 83.65$\pm$0.59   & 83.11$\pm$1.09   &  \\
-		 & TFHNN             & 85.96$\pm$0.41   & 86.09$\pm$0.24   &  \\
+		 & TFHNN             & 85.96$\pm$0.41   & \textcolor{red}{86.09$\pm$0.24}   &  \\
 		 & HNHN              & 81.20$\pm$0.36   & 80.99$\pm$0.37   &  \\
 		 & UniGCNII          & 84.61$\pm$0.46   & 82.38$\pm$0.58   & 低于论文 \\
 		 & AllSetformer      & 85.66$\pm$0.41   & 85.50$\pm$0.39   &  \\
-		 & EDHNN             & 85.77$\pm$0.46   & 85.71$\pm$0.48   &  \\
+		 & EDHNN             & 85.77$\pm$0.46   & \underline{85.71$\pm$0.48}   &  \\
 		 & HyperGT           & 84.43$\pm$0.47   & 84.34$\pm$0.56   &  \\
-		 & EHNN              & 86.21$\pm$0.49   & 86.09$\pm$0.62   &  \\
+		 & EHNN              & \textcolor{red}{86.21$\pm$0.49}   & \textcolor{red}{86.09$\pm$0.62}   &  \\
 		 & TMPHN             & 85.32$\pm$0.48   & 85.62$\pm$0.26   &  \\
 		\bottomrule
 	\end{tabular}
@@ -218,12 +220,12 @@
 		\toprule
 		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
 		\midrule
-		\multirow{20}{*}{\textbf{Twitch}} & MLP               & 52.57$\pm$0.49   & 51.54$\pm$0.49   &  \\
+		\multirow{20}{*}{\textbf{Twitch}} & MLP               & \textcolor{red}{52.57$\pm$0.49}   & 51.54$\pm$0.49   &  \\
 		 & CEGCN             & 51.02$\pm$0.53   & 51.15$\pm$0.33   &  \\
 		 & CEGAT             & 51.05$\pm$0.61   & 50.84$\pm$0.52   &  \\
-		 & HGNN              & 52.38$\pm$0.56   & 52.38$\pm$0.56   &  \\
+		 & HGNN              & 52.38$\pm$0.56   & \underline{52.38$\pm$0.56}   &  \\
 		 & HyperGCN          & 51.32$\pm$0.72   & 51.52$\pm$0.51   &  \\
-		 & HCHA              & 52.35$\pm$0.71   & 52.38$\pm$0.56   &  \\
+		 & HCHA              & 52.35$\pm$0.71   & \underline{52.38$\pm$0.56}   &  \\
 		 & LEGCN             & 51.31$\pm$0.65   & 50.94$\pm$0.70   &  \\
 		 & HyperND           & 52.39$\pm$0.60   & 52.18$\pm$0.73   &  \\
 		 & PhenomNN          & 51.80$\pm$0.73   & 51.75$\pm$0.73   &  \\
@@ -232,7 +234,7 @@
 		 & DPHGNN            & 52.36$\pm$0.59   & 52.24$\pm$0.72   &  \\
 		 & TFHNN             & 52.34$\pm$0.53   & 51.89$\pm$1.11   &  \\
 		 & HNHN              & 51.12$\pm$0.65   & 51.12$\pm$0.65   &  \\
-		 & UniGCNII          & 52.50$\pm$0.57   & 52.41$\pm$0.67   &  \\
+		 & UniGCNII          & \underline{52.50$\pm$0.57}   & \textcolor{red}{52.41$\pm$0.67}   &  \\
 		 & AllSetformer      & 51.74$\pm$0.75   & 51.73$\pm$0.74   &  \\
 		 & EDHNN             & 50.54$\pm$0.23   & 50.43$\pm$0.40   &  \\
 		 & HyperGT           & 51.19$\pm$0.57   & 51.29$\pm$0.64   &  \\
@@ -260,13 +262,13 @@
 		 & HGNN              & 86.17$\pm$0.52   & 86.13$\pm$0.52   &  \\
 		 & HyperGCN          & 87.42$\pm$0.42   & 87.46$\pm$0.51   &  \\
 		 & HCHA              & 86.33$\pm$0.54   & 86.30$\pm$0.56   &  \\
-		 & LEGCN             & 87.52$\pm$0.50   & 88.15$\pm$0.45   &  \\
+		 & LEGCN             & 87.52$\pm$0.50   & \textcolor{red}{88.15$\pm$0.45}   &  \\
 		 & HyperND           & 86.73$\pm$0.56   & 85.63$\pm$2.51   &  \\
 		 & PhenomNN          & 87.81$\pm$0.12   & 87.88$\pm$0.11   &  \\
 		 & SheafHyperGNN     & 87.10$\pm$0.47   & 87.14$\pm$0.48   &  \\
-		 & HJRL              & 87.98$\pm$0.49   & 87.96$\pm$0.49   &  \\
+		 & HJRL              & \textcolor{red}{87.98$\pm$0.49}   & \underline{87.96$\pm$0.49}   &  \\
 		 & DPHGNN            & 86.72$\pm$0.33   & 86.73$\pm$0.44   &  \\
-		 & TFHNN             & 87.90$\pm$0.37   & 87.92$\pm$0.26   &  \\
+		 & TFHNN             & \underline{87.90$\pm$0.37}   & 87.92$\pm$0.26   &  \\
 		 & HNHN              & 85.66$\pm$1.28   & 85.57$\pm$1.41   &  \\
 		 & UniGCNII          & 87.57$\pm$0.54   & 87.53$\pm$0.56   &  \\
 		 & AllSetformer      & 87.79$\pm$0.30   & 87.63$\pm$0.33   &  \\
@@ -300,14 +302,14 @@
 		 & PhenomNN          & 28.49$\pm$0.41   & 28.49$\pm$0.49   &  \\
 		 & SheafHyperGNN     & 28.35$\pm$0.57   & 27.94$\pm$0.73   &  \\
 		 & HJRL              & 26.90$\pm$0.55   & 26.89$\pm$0.60   &  \\
-		 & DPHGNN            & 28.57$\pm$1.07   & 28.87$\pm$0.92   &  \\
+		 & DPHGNN            & \underline{28.57$\pm$1.07}   & \underline{28.87$\pm$0.92}   &  \\
 		 & TFHNN             & 28.56$\pm$0.68   & 28.52$\pm$0.44   &  \\
 		 & HNHN              & 27.29$\pm$0.70   & 27.30$\pm$0.69   &  \\
 		 & UniGCNII          & 28.39$\pm$0.64   & 28.21$\pm$0.65   &  \\
 		 & AllSetformer      & 27.32$\pm$1.11   & 27.58$\pm$1.28   &  \\
 		 & EDHNN             & 28.38$\pm$0.31   & 28.06$\pm$0.21   &  \\
 		 & HyperGT           & 26.58$\pm$0.33   & 23.52$\pm$3.15   & 低于论文 \\
-		 & EHNN              & 28.95$\pm$0.81   & 29.05$\pm$0.47   &  \\
+		 & EHNN              & \textcolor{red}{28.95$\pm$0.81}   & \textcolor{red}{29.05$\pm$0.47}   &  \\
 		 & TMPHN             & 24.63$\pm$1.22   & 23.07$\pm$1.98   & 低于论文 \\
 		\bottomrule
 	\end{tabular}
@@ -333,13 +335,13 @@
 		 & HCHA              & 91.18$\pm$0.30   & 91.22$\pm$0.33   &  \\
 		 & LEGCN             & 85.16$\pm$0.14   & 90.54$\pm$0.20   & 高于论文 \\
 		 & HyperND           & 91.34$\pm$0.19   & 91.34$\pm$0.17   &  \\
-		 & PhenomNN          & 91.83$\pm$0.25   & 91.87$\pm$0.24   &  \\
+		 & PhenomNN          & \textcolor{red}{91.83$\pm$0.25}   & \textcolor{red}{91.87$\pm$0.24}   &  \\
 		 & SheafHyperGNN     & 91.09$\pm$0.31   & 91.10$\pm$0.22   &  \\
 		 & HJRL              & OOM              & --               & 论文中即为 OOM \\
 		 & DPHGNN            & OOM              & --               & 论文中即为 OOM \\
 		 & TFHNN             & 91.38$\pm$0.24   & 90.63$\pm$0.21   &  \\
 		 & HNHN              & 85.84$\pm$0.07   & 85.91$\pm$0.05   &  \\
-		 & UniGCNII          & 91.71$\pm$0.20   & 91.67$\pm$0.20   &  \\
+		 & UniGCNII          & \underline{91.71$\pm$0.20}   & \underline{91.67$\pm$0.20}   &  \\
 		 & AllSetformer      & 91.51$\pm$0.22   & 91.41$\pm$0.25   &  \\
 		 & EDHNN             & 91.55$\pm$0.19   & 91.42$\pm$0.19   &  \\
 		 & HyperGT           & 84.53$\pm$0.30   & 84.50$\pm$0.36   &  \\
@@ -383,10 +385,10 @@
 		 & TFHNN             & 77.04$\pm$0.12   & 77.47$\pm$0.31   &  \\
 		 & HNHN              & 65.21$\pm$0.28   & 65.04$\pm$0.35   &  \\
 		 & UniGCNII          & 76.26$\pm$0.58   & 65.16$\pm$0.82   & 低于论文 \\
-		 & AllSetformer      & 78.61$\pm$0.13   & 78.81$\pm$0.19   &  \\
+		 & AllSetformer      & \textcolor{red}{78.61$\pm$0.13}   & \textcolor{red}{78.81$\pm$0.19}   &  \\
 		 & EDHNN             & 77.90$\pm$0.21   & 78.09$\pm$0.12   &  \\
 		 & HyperGT           & OOM              & --               & 论文中即为 OOM \\
-		 & EHNN              & 77.95$\pm$0.14   & 78.27$\pm$0.17   &  \\
+		 & EHNN              & \underline{77.95$\pm$0.14}   & \underline{78.27$\pm$0.17}   &  \\
 		 & TMPHN             & 73.48$\pm$0.33   & --               & 缺 YAML 配置段，主机内存不足 \\
 		\bottomrule
 	\end{tabular}
@@ -421,11 +423,11 @@
 		 & SheafHyperGNN     & OOM              & --               & 缺 YAML 配置段，配置错误 \\
 		 & HJRL              & OOM              & --               & 主机内存不足 \\
 		 & DPHGNN            & OOM              & --               & 缺 YAML 配置段，配置错误 \\
-		 & TFHNN             & 35.16$\pm$0.54   & 34.14$\pm$1.27   &  \\
+		 & TFHNN             & \textcolor{red}{35.16$\pm$0.54}   & \underline{34.14$\pm$1.27}   &  \\
 		 & HNHN              & 25.86$\pm$0.63   & 25.86$\pm$0.63   &  \\
 		 & UniGCNII          & 31.09$\pm$0.61   & 30.93$\pm$0.58   &  \\
 		 & AllSetformer      & 33.18$\pm$0.88   & 32.38$\pm$0.11   &  \\
-		 & EDHNN             & 34.84$\pm$0.93   & 34.55$\pm$1.11   &  \\
+		 & EDHNN             & \underline{34.84$\pm$0.93}   & \textcolor{red}{34.55$\pm$1.11}   &  \\
 		 & HyperGT           & OOM              & --               & 缺 YAML 配置段，配置错误 \\
 		 & EHNN              & 34.09$\pm$3.19   & 33.79$\pm$2.48   &  \\
 		 & TMPHN             & OOM              & --               & 缺 YAML 配置段，主机内存不足 \\
@@ -449,19 +451,19 @@
 		\toprule
 		数据集 & 方法 & 论文 (\%) & 复现 (\%) & 备注 \\
 		\midrule
-		\multirow{20}{*}{\textbf{Pokec}} & MLP               & 59.64$\pm$0.48   & 59.64$\pm$0.48   &  \\
+		\multirow{20}{*}{\textbf{Pokec}} & MLP               & \underline{59.64$\pm$0.48}   & \textcolor{red}{59.64$\pm$0.48}   &  \\
 		 & CEGCN             & 57.37$\pm$0.38   & 56.92$\pm$0.53   &  \\
 		 & CEGAT             & 57.34$\pm$0.52   & 57.06$\pm$0.51   &  \\
 		 & HGNN              & 57.87$\pm$0.76   & 58.07$\pm$0.32   &  \\
 		 & HyperGCN          & 57.51$\pm$0.54   & 57.46$\pm$0.40   &  \\
 		 & HCHA              & 58.19$\pm$0.45   & 57.96$\pm$0.47   &  \\
-		 & LEGCN             & 59.66$\pm$0.63   & 58.47$\pm$0.54   & 低于论文 \\
+		 & LEGCN             & \textcolor{red}{59.66$\pm$0.63}   & 58.47$\pm$0.54   & 低于论文 \\
 		 & HyperND           & 57.65$\pm$1.08   & 57.50$\pm$0.90   &  \\
 		 & PhenomNN          & 58.43$\pm$0.92   & 58.19$\pm$0.61   &  \\
 		 & SheafHyperGNN     & 59.06$\pm$0.37   & 59.03$\pm$0.44   &  \\
 		 & HJRL              & 57.57$\pm$0.47   & 57.58$\pm$0.31   &  \\
 		 & DPHGNN            & 58.20$\pm$0.58   & 51.83$\pm$4.66   & 低于论文 \\
-		 & TFHNN             & 59.17$\pm$0.52   & 59.13$\pm$0.45   &  \\
+		 & TFHNN             & 59.17$\pm$0.52   & \underline{59.13$\pm$0.45}   &  \\
 		 & HNHN              & 58.55$\pm$0.93   & 58.42$\pm$0.68   &  \\
 		 & UniGCNII          & 58.56$\pm$0.73   & 58.71$\pm$0.60   &  \\
 		 & AllSetformer      & 58.55$\pm$0.56   & 58.72$\pm$0.63   &  \\
@@ -500,12 +502,12 @@ DPHGNN 五个种子依次为 $57.41, 51.89, 49.57, 44.37, 55.89\%$，最高与�
 		 & HyperGCN          & 42.39$\pm$1.25   & 43.85$\pm$0.94   &  \\
 		 & HCHA              & 52.50$\pm$3.43   & 53.03$\pm$1.99   &  \\
 		 & LEGCN             & 33.45$\pm$1.45   & --               & 22 GB 卡显存不足 \\
-		 & HyperND           & 87.19$\pm$1.89   & 88.17$\pm$0.79   &  \\
+		 & HyperND           & \underline{87.19$\pm$1.89}   & \underline{88.17$\pm$0.79}   &  \\
 		 & PhenomNN          & OOM              & --               & 缺 YAML 配置段，配置错误 \\
 		 & SheafHyperGNN     & OOM              & --               & 缺 YAML 配置段，配置错误 \\
 		 & HJRL              & OOM              & --               & 主机内存不足 \\
 		 & DPHGNN            & OOM              & --               & 缺 YAML 配置段，配置错误 \\
-		 & TFHNN             & 90.79$\pm$0.79   & 91.58$\pm$0.82   &  \\
+		 & TFHNN             & \textcolor{red}{90.79$\pm$0.79}   & \textcolor{red}{91.58$\pm$0.82}   &  \\
 		 & HNHN              & 53.75$\pm$1.43   & 50.59$\pm$1.78   & 低于论文 \\
 		 & UniGCNII          & 36.15$\pm$0.56   & 36.27$\pm$0.25   &  \\
 		 & AllSetformer      & 59.92$\pm$4.02   & 55.47$\pm$8.52   & 低于论文 \\
