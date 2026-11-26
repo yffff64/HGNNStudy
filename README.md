@@ -2,6 +2,22 @@
 
 This repository documents my reproduction of the **node classification** experiments in *DHG-Bench: A Comprehensive Benchmark for Deep Hypergraph Learning* (ICLR 2026). All **20 baselines** are evaluated on **13 hypergraph datasets**, using **5 random seeds** each and the per-dataset hyperparameters released with the benchmark.
 
+### Reproduction Summary
+
+| Item | Result |
+| --- | --- |
+| **Reproduction scale** | 20 methods x 13 datasets = **260** combinations; **234 completed** and **26 failed** (OOM or missing config). **233 cells** have both a paper value and a reproduced value and are directly comparable. |
+| **Reproduction accuracy** | Across the 233 comparable cells, the mean absolute gap is **0.53 points** and the median is **0.14 points**; **206 / 233 (88.4%)** lie within 1.0 point of the paper. |
+
+The unmodified official code gives 232 completed / 28 failed. The two additional successful cells in this repository are **EHNN on Coauthor-DBLP** and **LEGCN on Walmart-Trips-100**, which only run after the source fixes described in Section 6. Separately, **PhenomNN on Walmart-Trips-100** is marked OOM in the paper but completes here at 60.82%.
+
+**Where the result LaTeX lives.** The complete per-dataset results — including the red best and underlined second-best cells — are written in these LaTeX source files, each compiled to a PDF in the same folder:
+
+- `study_notes/study_notes_cn.tex` → `study_notes/study_notes_cn.pdf` (Chinese)
+- `study_notes/study_notes_en.tex` → `study_notes/study_notes_en.pdf` (English)
+
+The raw per-run records are under `dhgbench/results/node_cls/<dataset>/<method>.json`, and the aggregated workbook is `node_cls_results.xlsx`.
+
 ---
 
 ## 1. Environment
@@ -847,7 +863,7 @@ TMPHN            [no YAML section] config_tmphn.yaml has no 'trivago' section.
 
 ## 5. Reproduction Notes
 
-The 28 failed combinations fall into four mechanisms, using the same labels as the study notes:
+The 28 combinations that fail under the unmodified official code fall into four mechanisms, using the same labels as the study notes (two of them — EHNN on Coauthor-DBLP and LEGCN on Walmart — become runnable after the Section 6 fixes, leaving 26 final failures):
 
 - **(i) OOM in paper:** the combination is already reported as out-of-memory in the benchmark and cannot fit here either.
 - **(ii) Local GPU OOM:** the benchmark reports a score, but the run exhausts the 22 GB GPU memory.
@@ -855,7 +871,7 @@ The 28 failed combinations fall into four mechanisms, using the same labels as t
 - **(iv) Host-memory OOM:** a preprocessing step requests a very large CPU array and exceeds the available CPU RAM (for example TMPHN and Yelp/LEGCN). These are host-memory failures, not GPU OOM.
 
 - **UniGCNII:** the benchmark reports only the UniGCNII variant of the UniGNN family, identified as the most competitive variant in the original UniGNN paper.
-- Overall, 232 of the 260 combinations completed successfully; the remaining 28 are recorded in both the Excel workbook and the LaTeX tables.
+- Overall, 232 of the 260 combinations completed under the unmodified code (28 failed). After the two source fixes in Section 6, the final tally recorded in the LaTeX tables is **234 completed / 26 failed**; the Excel workbook keeps the original 232 / 28 run records.
 
 ## 6. Source and Modifications
 
