@@ -878,7 +878,7 @@ The 28 combinations that fail under the unmodified official code fall into four 
 This repository is built on the official DHG-Bench codebase:
 
 - Upstream repository: https://github.com/Coco-Hut/DHG-Bench
-- The original project structure, models and data pipeline are retained, and the benchmark paper is cited in Section 7.
+- The original project structure, models and data pipeline are retained, and the benchmark paper is cited in Section 8.
 
 Besides adding the reproduction results, the `study_notes/` folder and this README, the following source changes were made. All of them change the internal representation or configuration loading, never the model definition or the intended computation.
 
@@ -901,7 +901,54 @@ Besides adding the reproduction results, the `study_notes/` folder and this READ
 
 These YAML sections let the config loader return a valid configuration instead of raising an `AttributeError` from a missing key.
 
-## 7. Citation
+## 7. Configuration Issues, Fixes and Remaining Problems
+
+### 7.1 Combinations with no YAML section provided
+
+The official YAML files do not ship a per-dataset section for the following **14 dataset x method combinations**. When such a combination is launched, `method_config()` looks up a key that does not exist; its bare `except` silently swallows the underlying KeyError and keeps the argparse parser defaults, so the run later aborts with an `AttributeError`.
+
+| Dataset | Methods without a YAML section | Count |
+| --- | --- | :---: |
+| Walmart-Trips-100 | SheafHyperGNN, DPHGNN, TMPHN | 3 |
+| Yelp | CEGAT, LEGCN, SheafHyperGNN, DPHGNN, HyperGT, TMPHN | 6 |
+| Trivago | CEGAT, PhenomNN, SheafHyperGNN, DPHGNN, TMPHN | 5 |
+| **Total** | | **14** |
+
+For HJRL and UniGCNII the missing sections were instead filled in (see Section 6), so those two methods run normally on every dataset.
+
+### 7.2 Problems encountered during reproduction
+
+The problems fell into four failure mechanisms plus a set of reproducible numerical discrepancies:
+
+1. **Missing YAML section (mechanism iii):** the 14 combinations above abort with an `AttributeError` because no per-dataset configuration is released.
+2. **GPU out-of-memory (mechanisms i and ii):** some combinations are already reported as OOM in the paper, while others have a paper score but exhaust the 22 GB VRAM locally (e.g. LEGCN on Trivago).
+3. **Host-memory OOM (mechanism iv):** a preprocessing step expands a sparse matrix into a dense CPU array that exceeds the available RAM — for example TMPHN on Walmart needs a 52.6 GiB array from `toarray()`, and HJRL/EHNN build very large dense incidence matrices.
+4. **Numerical discrepancies:** even when a run completes, some cells differ from the paper by a stable, reproducible margin rather than failing outright.
+
+### 7.3 How the problems were resolved
+
+The recoverable problems were fixed by changing the representation or the config loading, never the model definition:
+
+- **EHNN on Coauthor-DBLP:** `ehnn_preprocessing()` now treats `coauthor_dblp` like `yelp` and `walmart-trips-100`, routing it down the sparse path so the 41,302 x 63,665 dense incidence matrix (9.80 GiB of contiguous memory) is no longer built. The computed result is unchanged and EHNN runs at 90.37%.
+- **LEGCN on Walmart-Trips-100:** `line_expansion()` returns a transposed `SparseTensor` instead of the raw COO index, so `GCNConv` uses the sparse kernel and never materialises the 36.07 GiB dense adjacency; peak memory drops to 9.35 GiB and LEGCN runs at 67.82%.
+- **`legcn.py`:** every `GCNConv` is created with `add_self_loops=False` to avoid a duplicated self-loop in the line-expansion graph.
+- **`config_hjrl.yaml` / `config_unigin.yaml`:** the missing per-dataset sections were added (4 and 12 sections respectively), letting HJRL and UniGCNII load a valid configuration.
+- **DPHGNN on Pokec:** re-running across five seeds showed the gap comes from training instability (one seed's loss spikes and it lands at 44.37), not a systematic bias; the five-seed result is reported with its standard deviation.
+
+### 7.4 Remaining problems and likely causes
+
+The 26 final failures and the stable numerical gaps were not force-fixed, because doing so would change the paper's settings. Their likely causes are:
+
+- **Paper OOM (mechanism i):** the model and data inherently exceed memory at this scale, so a single 22 GB card cannot fit them regardless of configuration; a larger-memory device is the practical requirement.
+- **Local GPU OOM (mechanism ii, e.g. LEGCN on Trivago):** the 22 GB VRAM is insufficient for the full attention/adjacency tensors; a higher-VRAM GPU would be needed.
+- **Host-memory OOM (mechanism iv):** the dense preprocessing expansion needs tens of GiB of CPU RAM (52.6 GiB for TMPHN); a fully sparse implementation or a machine with much more RAM would be required.
+- **Missing YAML section (mechanism iii):** the official per-dataset hyperparameters are not published, so they cannot be reconstructed reliably; substituting parser defaults would silently change the paper configuration and give non-comparable numbers.
+- **LEGCN systematically high (e.g. +4.0 on Cora):** attributed to the platform difference (Windows + RTX 2080 Ti here versus Ubuntu + Quadro RTX 6000 in the paper); tiny differences in the low-level sparse kernels accumulate across layers. A 20-seed check ruled out random fluctuation.
+- **UniGCNII low on Walmart (-11.1):** not an implementation bug (it matches the paper on the other 12 datasets); this dataset's features are loaded with Gaussian noise of standard deviation 0.6, and the environment difference is plausibly amplified through those noisy features. Sweeps of learning rate and restart alpha could not recover the paper value.
+- **HyperGT/TMPHN low on Amazon (Ratings):** 86% of the nodes (19,175 of 22,299) are isolated and belong to no hyperedge, so these large models under-fit with no neighbours to aggregate; simpler deterministic models such as HGNN stay stable at about 28%.
+- **DPHGNN on Pokec:** the wide spread across seeds is training instability rather than a stable systematic bias.
+
+## 8. Citation
 | **ID** | **Method** | **Paper** |     **Venue**     |  
 | :----: | :----: | :----: |:----: |  
 |1 | HGNN | [Hypergraph neural networks](https://cdn.aaai.org/ojs/4235/4235-13-7289-1-10-20190705.pdf) | AAAI 2019 | 
