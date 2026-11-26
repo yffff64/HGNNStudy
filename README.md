@@ -102,6 +102,21 @@ The helper `run_all_node_cls.py` runs every dataset x method combination in orde
 
 Result JSON files are written to `dhgbench/results/node_cls/<dataset>/<method>.json`, and the aggregated workbook is `node_cls_results.xlsx`.
 
+### 3.1 Re-running a single problematic combination in PyCharm
+
+When a specific dataset x method combination fails or gives an unexpected result, re-run it on its own in PyCharm instead of launching the whole batch. Each saved run configuration targets one combination and is named `<dataset>_<method>` (e.g. `actor_LEGCN`, `yelp_HyperGCN`, `amazon_HyperGT`).
+
+1. Open the repository folder in PyCharm and set the project interpreter to the conda environment `dhgbench` (**Settings → Project → Python Interpreter**).
+2. Go to **Run → Edit Configurations**, click **+ → Python**, and fill in:
+   - **Name:** `<dataset>_<method>`
+   - **Script path:** the `main.py` inside the `dhgbench/` folder
+   - **Parameters:** `--dname=<dataset> --task_type=node_cls --method=<method> --num_seeds=5`
+   - **Working directory:** the absolute path to the `dhgbench/` folder — this is mandatory, because `main.py` resolves `lib_yamls/` and `results/` relative to the working directory
+   - **Python interpreter:** `dhgbench`
+3. Do **not** add `--is_default`. Leaving it at the default `False` loads the dataset-specific YAML section, matching the paper.
+4. Save the configuration, select it from the drop-down in the top-right corner, and press **Run** — or **Debug** to set breakpoints and inspect the failure step by step.
+5. The run prints live epoch output and writes the result to `results/node_cls/<dataset>/<method>.json`. Repeat for every problematic combination: the batch helper skips failed cells, so these single runs are how the recoverable failures are re-tested.
+
 ---
 
 ## 4. Complete Commands and Hyperparameters by Dataset
@@ -849,11 +864,26 @@ This repository is built on the official DHG-Bench codebase:
 - Upstream repository: https://github.com/Coco-Hut/DHG-Bench
 - The original project structure, models and data pipeline are retained, and the benchmark paper is cited in Section 7.
 
-Besides adding the reproduction results, the `study_notes/` folder and this README, the following source changes were made:
+Besides adding the reproduction results, the `study_notes/` folder and this README, the following source changes were made. All of them change the internal representation or configuration loading, never the model definition or the intended computation.
 
-- `dhgbench/lib_models/HNN/legcn.py`: pass `add_self_loops=False` to every `GCNConv`, preventing a duplicated self-loop in the line-expansion graph.
-- `dhgbench/lib_models/HNN/preprocessing.py`: represent the line-expansion adjacency as a transposed `SparseTensor` instead of a dense edge tensor that could reach tens of GB, and route `coauthor_dblp` through the memory-sparse EHNN path. These change the representation, not the computed result.
-- `dhgbench/lib_yamls/node_yamls/config_hjrl.yaml` and `config_unigin.yaml`: fill in missing per-dataset YAML sections so the affected methods load a valid configuration.
+**`dhgbench/lib_models/HNN/legcn.py`**
+
+- Every `GCNConv` is created with `add_self_loops=False` (4 call sites), so the line-expansion graph does not get a second self-loop added on top of the one already present in the data.
+
+**`dhgbench/lib_models/HNN/preprocessing.py`**
+
+- `line_expansion()` now wraps the computed adjacency in a transposed `SparseTensor` (`SparseTensor.from_edge_index(...).t()`) instead of returning the raw COO edge index. `GCNConv` then uses the sparse message-passing kernel and never materialises a dense adjacency. On the large Walmart line-expansion graph (about 75.6 million edges) the original path built a 36.07 GiB dense tensor and triggered a CUDA OOM, whereas the sparse representation peaks at 9.35 GiB.
+- `ehnn_preprocessing()` adds `coauthor_dblp` to the list of datasets that skip the dense incidence expansion. Like `yelp` and `walmart-trips-100`, `coauthor_dblp` now stays on the sparse path and no longer builds the 41,302 x 63,665 dense matrix (which needed 9.80 GiB of contiguous host memory). The computed result is unchanged, and EHNN then runs at 90.37%.
+
+**`dhgbench/lib_yamls/node_yamls/config_hjrl.yaml`**
+
+- Added the missing per-dataset sections for `coauthor_dblp`, `walmart-trips-100`, `yelp` and `trivago`.
+
+**`dhgbench/lib_yamls/node_yamls/config_unigin.yaml`**
+
+- Added the missing per-dataset sections for all 12 node-classification datasets other than `cora` (the original file only contained `default` and `cora`).
+
+These YAML sections let the config loader return a valid configuration instead of raising an `AttributeError` from a missing key.
 
 ## 7. Citation
 | **ID** | **Method** | **Paper** |     **Venue**     |  
