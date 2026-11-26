@@ -40,7 +40,74 @@ The Python interpreter used throughout is the conda environment `dhgbench`:
 D:\anaconda3\envs\dhgbench\python.exe
 ```
 
-Key dependencies (per the official requirements): `torch`, `torch_geometric`, `torch-cluster`, `torch-scatter`, `torch-sparse`, `torch-spline-conv`, `deeprobust==0.2.11`, `numpy==1.24.3`, `dask==2024.8.0`.
+### 1.1 Key Python Packages
+
+The packages that are explicitly installed and their roles (versions are the ones actually used in this environment):
+
+| Package | Version | Role |
+| --- | --- | --- |
+| `torch` | 2.6.0+cu124 | Deep learning framework (CUDA 12.4 build) |
+| `torch-geometric` | 2.8.1 | Graph / hypergraph message-passing framework |
+| `torch_scatter` | 2.1.2+pt26cu124 | Segmented aggregation operator |
+| `torch_sparse` | 0.6.18+pt26cu124 | Sparse-matrix operator |
+| `torch_cluster` | 1.6.3+pt26cu124 | Nearest-neighbour and sampling operators |
+| `torch_spline_conv` | 1.2.2+pt26cu124 | Spline-based convolution operator |
+| `numpy` | 1.24.3 | Numerical computing (pinned to the 1.x line) |
+| `scipy` | 1.15.3 | Sparse matrices and scientific computing |
+| `scikit-learn` | 1.5.2 | Dataset splitting and evaluation metrics |
+| `pandas` | 1.5.3 | Table reading and statistical output |
+| `PyYAML` | 6.0.3 | Reads the `lib_yamls/*.yaml` hyperparameter files |
+| `dask` | 2024.8.0 | Chunked processing of large graph data |
+| `tqdm` | 4.70.1 | Training progress bar |
+| `openpyxl` | 3.1.5 | Reading and writing the Excel results |
+| `deeprobust` | 0.2.11 | Dependency of several baselines |
+
+### 1.2 Environment Setup
+
+The following commands reproduce the environment above. They are run in an Anaconda Prompt (or PowerShell) on Windows.
+
+**Step 1 — Create the environment**
+
+```bash
+conda create -n dhgbench python=3.10 -y
+conda activate dhgbench
+python -V            # must be 3.10.x (this environment uses 3.10.22)
+```
+
+**Step 2 — Install the dependencies**
+
+```bash
+# PyTorch 2.6.0 with CUDA 12.4
+pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+
+# PyTorch Geometric main package
+pip install torch_geometric==2.8.1
+
+# PyG extension operators, matched to torch 2.6.0 + cu124
+pip install torch_scatter torch_sparse torch_cluster torch_spline_conv -f https://data.pyg.org/whl/torch-2.6.0+cu124.html
+
+# Remaining packages
+pip install "numpy==1.24.3" scipy==1.15.3 scikit-learn==1.5.2 pandas==1.5.3 PyYAML==6.0.3 dask==2024.8.0 tqdm==4.70.1 openpyxl==3.1.5 deeprobust==0.2.11
+```
+
+**Step 3 — Verify**
+
+```bash
+python -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+python -c "import torch_scatter, torch_sparse, torch_cluster, torch_spline_conv; print('pyg-ext ok')"
+python -c "import torch_geometric, numpy; print(torch_geometric.__version__, numpy.__version__)"
+cd dhgbench
+python -c "from lib_utils.exp_agent import ExpAgent; print('project ok')"
+```
+
+Expected output:
+
+```
+2.6.0+cu124 True NVIDIA GeForce RTX 2080 Ti
+pyg-ext ok
+2.8.1 1.24.3
+project ok
+```
 
 ---
 
