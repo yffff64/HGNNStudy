@@ -8,6 +8,7 @@ This repository documents my reproduction of the **node classification** experim
 | --- | --- |
 | **Reproduction scale** | 20 methods x 13 datasets = **260** combinations; **234 completed** and **26 failed** (OOM or missing config). **233 cells** have both a paper value and a reproduced value and are directly comparable. |
 | **Reproduction accuracy** | Across the 233 comparable cells, the mean absolute gap is **0.52 points** and the median is **0.14 points**; **206 / 233 (88.4%)** lie within 1.0 point of the paper. |
+| **Comparable cells per dataset** | Cora 20, Coauthor-Cora 20, NTU2012 20, ModelNet40 20, Actor 20, Twitch 20, Pubmed 20, Amazon 20 (first 8 = 160); Coauthor-DBLP 18, Walmart-Trips-100 14, Yelp 10, Pokec 20, Trivago 11; total **233**. |
 
 The unmodified official code gives 232 completed / 28 failed. The two additional successful cells in this repository are **EHNN on Coauthor-DBLP** and **LEGCN on Walmart-Trips-100**, which only run after the source fixes described in Section 5. Separately, **PhenomNN on Walmart-Trips-100** is marked OOM in the paper but completes here at 60.82%.
 
