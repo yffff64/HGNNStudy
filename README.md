@@ -7,7 +7,7 @@ This repository documents my reproduction of the **node classification** experim
 | Item | Result |
 | --- | --- |
 | **Reproduction scale** | 20 methods x 13 datasets = **260** combinations; **234 completed** and **26 failed** (OOM or missing config). **233 cells** have both a paper value and a reproduced value and are directly comparable. |
-| **Reproduction accuracy** | Across the 233 comparable cells, the mean absolute gap is **0.53 points** and the median is **0.14 points**; **206 / 233 (88.4%)** lie within 1.0 point of the paper. |
+| **Reproduction accuracy** | Across the 233 comparable cells, the mean absolute gap is **0.52 points** and the median is **0.14 points**; **206 / 233 (88.4%)** lie within 1.0 point of the paper. |
 
 The unmodified official code gives 232 completed / 28 failed. The two additional successful cells in this repository are **EHNN on Coauthor-DBLP** and **LEGCN on Walmart-Trips-100**, which only run after the source fixes described in Section 5. Separately, **PhenomNN on Walmart-Trips-100** is marked OOM in the paper but completes here at 60.82%.
 
@@ -800,8 +800,8 @@ The 26 final failures and the stable numerical gaps were not force-fixed, becaus
 - **DPHGNN on Pokec:** the wide spread across seeds is training instability rather than a stable systematic bias.
 
 ## 6. Citation
-| **ID** | **Method** | **Paper** |     **Venue**     |  
-| :----: | :----: | :----: |:----: |  
+| **ID** | **Method** | **Paper** |     **Venue**     |
+| :----: | :----: | :----: |:----: |
 |1| MLP | Multilayer Perceptron (feature-only baseline) | — |
 |2| CEGCN | Clique-expansion GCN: [Semi-supervised Classification with Graph Convolutional Networks](https://arxiv.org/abs/1609.02907) | ICLR 2017 |
 |3| CEGAT | Clique-expansion GAT: [Graph Attention Networks](https://arxiv.org/abs/1710.10903) | ICLR 2018 |
@@ -822,5 +822,3 @@ The 26 final failures and the stable numerical gaps were not force-fixed, becaus
 |18| T-HyperGNNs | [T-HyperGNNs: Hypergraph Neural Networks via Tensor Representations](https://ieeexplore.ieee.org/document/10462516) | TNNLS 2024 |
 |19| HyperGT | [Hypergraph Transformer for Semi-Supervised Classification](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10446248) | ICASSP 2024 |
 |20| TF-HNN | [Training-Free Message Passing for Learning on Hypergraphs](https://openreview.net/pdf?id=4AuyYxt7A2) | ICLR 2025 |
-
-```

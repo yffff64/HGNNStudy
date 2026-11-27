@@ -209,7 +209,7 @@ These notes document my study of DHG-Bench\cite{li2026dhg}.
 	\caption{Node classification results on \textbf{Actor}.}
 \end{table}
 \par\smallskip
-\noindent\textbf{Actor:} All 20 methods complete; TFHNN is best at $86.09\%$ (paper $85.96\%$), with 18 of 20 cells within 1.0 point and a mean gap of 0.45 points.
+\noindent\textbf{Actor:} All 20 methods complete; TFHNN is best at $86.09\%$ (paper $85.96\%$), with 18 of 20 cells within 1.0 point and a mean gap of 0.41 points.
 
 \noindent\textit{Lower than paper:} LEGCN ($-3.2$) and UniGCNII ($-2.2$) stay reproducibly below the paper at the same value after re-running, so this is not random fluctuation. With the code, data, and seeds identical and no added noise, the gap can only come from the environment. Both models are heavily regularised and especially sensitive to tiny numerical differences in the low-level sparse-matrix operations; these differences are then amplified layer by layer through normalisation, ending in a stable gap.
 
@@ -440,7 +440,7 @@ These notes document my study of DHG-Bench\cite{li2026dhg}.
 \end{table}
 
 \par\smallskip
-\noindent\textbf{Yelp:} Only 10 of 20 methods complete; EDHNN is best at $34.55\%$ (paper $34.84\%$), with 7 of the 10 successful cells within 1.0 point.
+\noindent\textbf{Yelp:} Only 10 of 20 methods complete; EDHNN is best at $34.55\%$ (paper $34.84\%$), with 8 of the 10 successful cells within 1.0 point.
 
 \noindent\textit{Lower than paper:} HyperGCN is the largest gap at $21.48\pm6.98\%$ ($-7.8$); the inflated deviation ($6.98$ vs. $0.55$) shows unstable convergence with some seeds on poor solutions, rather than a stable bias.
 
