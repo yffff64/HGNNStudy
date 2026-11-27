@@ -9,7 +9,7 @@ This repository documents my reproduction of the **node classification** experim
 | **Reproduction scale** | 20 methods x 13 datasets = **260** combinations; **234 completed** and **26 failed** (OOM or missing config). **233 cells** have both a paper value and a reproduced value and are directly comparable. |
 | **Reproduction accuracy** | Across the 233 comparable cells, the mean absolute gap is **0.53 points** and the median is **0.14 points**; **206 / 233 (88.4%)** lie within 1.0 point of the paper. |
 
-The unmodified official code gives 232 completed / 28 failed. The two additional successful cells in this repository are **EHNN on Coauthor-DBLP** and **LEGCN on Walmart-Trips-100**, which only run after the source fixes described in Section 6. Separately, **PhenomNN on Walmart-Trips-100** is marked OOM in the paper but completes here at 60.82%.
+The unmodified official code gives 232 completed / 28 failed. The two additional successful cells in this repository are **EHNN on Coauthor-DBLP** and **LEGCN on Walmart-Trips-100**, which only run after the source fixes described in Section 5. Separately, **PhenomNN on Walmart-Trips-100** is marked OOM in the paper but completes here at 60.82%.
 
 **Where the result LaTeX lives.** The complete per-dataset results — including the red best and underlined second-best cells — are written in these LaTeX source files, each compiled to a PDF in the same folder:
 
@@ -17,6 +17,37 @@ The unmodified official code gives 232 completed / 28 failed. The two additional
 - `study_notes/study_notes_en.tex` → `study_notes/study_notes_en.pdf` (English)
 
 The raw per-run records are under `dhgbench/results/node_cls/<dataset>/<method>.json`, and the aggregated workbook is `node_cls_results.xlsx`.
+
+---
+
+## Table of Contents
+
+- [1. Environment](#1-environment)
+  - [1.1 Key Python Packages](#11-key-python-packages)
+  - [1.2 Environment Setup](#12-environment-setup)
+- [2. Data Preparation](#2-data-preparation)
+- [3. How to Run](#3-how-to-run)
+  - [3.1 Re-running a single problematic combination in PyCharm](#31-re-running-a-single-problematic-combination-in-pycharm)
+- [4. Complete Commands and Hyperparameters by Dataset](#4-complete-commands-and-hyperparameters-by-dataset)
+  - [4.1 Cora (`cora`)](#41-cora-cora)
+  - [4.2 Coauthor-Cora (`coauthor_cora`)](#42-coauthor-cora-coauthor_cora)
+  - [4.3 NTU2012 (`NTU2012`)](#43-ntu2012-ntu2012)
+  - [4.4 ModelNet40 (`ModelNet40`)](#44-modelnet40-modelnet40)
+  - [4.5 Actor (`actor`)](#45-actor-actor)
+  - [4.6 Twitch (Gamers) (`twitch`)](#46-twitch-gamers-twitch)
+  - [4.7 Pubmed (`pubmed`)](#47-pubmed-pubmed)
+  - [4.8 Amazon (Ratings) (`amazon`)](#48-amazon-ratings-amazon)
+  - [4.9 Coauthor-DBLP (`coauthor_dblp`)](#49-coauthor-dblp-coauthor_dblp)
+  - [4.10 Walmart-Trips-100 (`walmart-trips-100`)](#410-walmart-trips-100-walmart-trips-100)
+  - [4.11 Yelp (`yelp`)](#411-yelp-yelp)
+  - [4.12 Pokec (`pokec`)](#412-pokec-pokec)
+  - [4.13 Trivago (`trivago`)](#413-trivago-trivago)
+- [5. Reproduction Notes, Source Modifications and Remaining Problems](#5-reproduction-notes-source-modifications-and-remaining-problems)
+  - [5.1 Combinations with no YAML section provided](#51-combinations-with-no-yaml-section-provided)
+  - [5.2 Problems encountered during reproduction](#52-problems-encountered-during-reproduction)
+  - [5.3 How the problems were resolved](#53-how-the-problems-were-resolved)
+  - [5.4 Remaining problems and likely causes](#54-remaining-problems-and-likely-causes)
+- [6. Citation](#6-citation)
 
 ---
 
@@ -204,31 +235,22 @@ When a specific dataset x method combination fails or gives an unexpected result
 
 ## 4. Complete Commands and Hyperparameters by Dataset
 
-For every dataset below, the first block lists the complete command for all 20 methods, and the second block lists the effective hyperparameters of each method as loaded from its YAML file. The paper's UniGNN row is reproduced with **UniGCNII** (paper Sec. 3.2). All commands below are run from the `dhgbench/` directory after `cd dhgbench` (see Section 3).
+For every dataset below, the first block gives one ready-to-run example command and the second block lists the effective hyperparameters of each method as loaded from its YAML file. The paper's UniGNN row is reproduced with **UniGCNII** (paper Sec. 3.2). All commands are run from the `dhgbench/` directory after `cd dhgbench` (see Section 3).
+
+The general command template is:
+
+```bash
+python main.py --dname=<dataset> --task_type=node_cls --method=<method> --num_seeds=5
+```
+
+Replace `<method>` with one of the 20 baselines. The per-dataset examples below use `MLP` as the worked example; any other method from this list works the same way:
+
+`MLP`, `CEGCN`, `CEGAT`, `HGNN`, `HyperGCN`, `HCHA`, `LEGCN`, `HyperND`, `PhenomNN`, `SheafHyperGNN`, `HJRL`, `DPHGNN`, `TFHNN`, `HNHN`, `UniGCNII`, `AllSetformer`, `EDHNN`, `HyperGT`, `EHNN`, `TMPHN`
 
 ### 4.1 Cora (`cora`)
 
 ```bash
 python main.py --dname=cora --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=cora --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -260,25 +282,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=coauthor_cora --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=coauthor_cora --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -310,25 +313,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=NTU2012 --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=NTU2012 --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -360,25 +344,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=ModelNet40 --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=ModelNet40 --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -410,25 +375,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=actor --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=actor --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -460,25 +406,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=twitch --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=twitch --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -510,25 +437,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=pubmed --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=pubmed --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -560,25 +468,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=amazon --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=amazon --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -610,25 +499,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=coauthor_dblp --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=coauthor_dblp --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -660,25 +530,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=walmart-trips-100 --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=walmart-trips-100 --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -725,25 +576,6 @@ TMPHN            [no YAML section] config_tmphn.yaml has no 'walmart-trips-100' 
 
 ```bash
 python main.py --dname=yelp --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=yelp --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -805,25 +637,6 @@ TMPHN            [no YAML section] config_tmphn.yaml has no 'yelp' section.
 
 ```bash
 python main.py --dname=pokec --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=pokec --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -855,25 +668,6 @@ TMPHN            [dataset section] All_num_layers=1, embedding_hidden=128, MLP_h
 
 ```bash
 python main.py --dname=trivago --task_type=node_cls --method=MLP --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=CEGCN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=CEGAT --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HGNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HyperGCN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HCHA --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=LEGCN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HyperND --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=PhenomNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=SheafHyperGNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HJRL --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=DPHGNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=TFHNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HNHN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=UniGCNII --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=AllSetformer --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=EDHNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=HyperGT --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=EHNN --num_seeds=5
-python main.py --dname=trivago --task_type=node_cls --method=TMPHN --num_seeds=5
 ```
 
 Effective hyperparameters:
@@ -928,9 +722,9 @@ TMPHN            [no YAML section] config_tmphn.yaml has no 'trivago' section.
 
 ---
 
-## 5. Reproduction Notes
+## 5. Reproduction Notes, Source Modifications and Remaining Problems
 
-The 28 combinations that fail under the unmodified official code fall into four mechanisms, using the same labels as the study notes (two of them — EHNN on Coauthor-DBLP and LEGCN on Walmart — become runnable after the Section 6 fixes, leaving 26 final failures):
+The 28 combinations that fail under the unmodified official code fall into four mechanisms, using the same labels as the study notes (two of them — EHNN on Coauthor-DBLP and LEGCN on Walmart — become runnable after the source changes below, leaving 26 final failures):
 
 - **(i) OOM in paper:** the combination is already reported as out-of-memory in the benchmark and cannot fit here either.
 - **(ii) Local GPU OOM:** the benchmark reports a score, but the run exhausts the 22 GB GPU memory.
@@ -938,16 +732,38 @@ The 28 combinations that fail under the unmodified official code fall into four 
 - **(iv) Host-memory OOM:** a preprocessing step requests a very large CPU array and exceeds the available CPU RAM (for example TMPHN and Yelp/LEGCN). These are host-memory failures, not GPU OOM.
 
 - **UniGCNII:** the benchmark reports only the UniGCNII variant of the UniGNN family, identified as the most competitive variant in the original UniGNN paper.
-- Overall, 232 of the 260 combinations completed under the unmodified code (28 failed). After the two source fixes in Section 6, the final tally recorded in the LaTeX tables is **234 completed / 26 failed**; the Excel workbook keeps the original 232 / 28 run records.
-
-## 6. Source and Modifications
+- Overall, 232 of the 260 combinations completed under the unmodified code (28 failed). After the two source fixes described below, the final tally recorded in the LaTeX tables is **234 completed / 26 failed**; the Excel workbook keeps the original 232 / 28 run records.
 
 This repository is built on the official DHG-Bench codebase:
 
 - Upstream repository: https://github.com/Coco-Hut/DHG-Bench
-- The original project structure, models and data pipeline are retained, and the benchmark paper is cited in Section 8.
+- The original project structure, models and data pipeline are retained, and the benchmark paper is cited in Section 6.
 
-Besides adding the reproduction results, the `study_notes/` folder and this README, the following source changes were made. All of them change the internal representation or configuration loading, never the model definition or the intended computation.
+### 5.1 Combinations with no YAML section provided
+
+The official YAML files do not ship a per-dataset section for the following **14 dataset x method combinations**. When such a combination is launched, `method_config()` looks up a key that does not exist; its bare `except` silently swallows the underlying KeyError and keeps the argparse parser defaults, so the run later aborts with an `AttributeError`.
+
+| Dataset | Methods without a YAML section | Count |
+| --- | --- | :---: |
+| Walmart-Trips-100 | SheafHyperGNN, DPHGNN, TMPHN | 3 |
+| Yelp | CEGAT, LEGCN, SheafHyperGNN, DPHGNN, HyperGT, TMPHN | 6 |
+| Trivago | CEGAT, PhenomNN, SheafHyperGNN, DPHGNN, TMPHN | 5 |
+| **Total** | | **14** |
+
+For HJRL and UniGCNII the missing sections were instead filled in (see Section 5.3), so those two methods run normally on every dataset.
+
+### 5.2 Problems encountered during reproduction
+
+Beyond the four mechanisms defined above, the concrete problems observed were:
+
+1. **Missing YAML section (mechanism iii):** the 14 combinations listed in Section 5.1 abort with an `AttributeError`, because no per-dataset configuration is released.
+2. **GPU out-of-memory (mechanisms i and ii):** some combinations are already reported as OOM in the paper, while others have a paper score but exhaust the 22 GB VRAM locally (e.g. LEGCN on Trivago).
+3. **Host-memory OOM (mechanism iv):** a preprocessing step expands a sparse matrix into a dense CPU array that exceeds the available RAM — for example TMPHN on Walmart needs a 52.6 GiB array from `toarray()`, and HJRL/EHNN build very large dense incidence matrices.
+4. **Numerical discrepancies:** even when a run completes, some cells differ from the paper by a stable, reproducible margin rather than failing outright.
+
+### 5.3 How the problems were resolved
+
+The recoverable problems were fixed by changing the internal representation or the configuration loading, never the model definition or the intended computation.
 
 **`dhgbench/lib_models/HNN/legcn.py`**
 
@@ -955,7 +771,7 @@ Besides adding the reproduction results, the `study_notes/` folder and this READ
 
 **`dhgbench/lib_models/HNN/preprocessing.py`**
 
-- `line_expansion()` now wraps the computed adjacency in a transposed `SparseTensor` (`SparseTensor.from_edge_index(...).t()`) instead of returning the raw COO edge index. `GCNConv` then uses the sparse message-passing kernel and never materialises a dense adjacency. On the large Walmart line-expansion graph (about 75.6 million edges) the original path built a 36.07 GiB dense tensor and triggered a CUDA OOM, whereas the sparse representation peaks at 9.35 GiB.
+- `line_expansion()` now wraps the computed adjacency in a transposed `SparseTensor` (`SparseTensor.from_edge_index(...).t()`) instead of returning the raw COO edge index. `GCNConv` then uses the sparse message-passing kernel and never materialises a dense adjacency. On the large Walmart line-expansion graph (about 75.6 million edges) the original path built a 36.07 GiB dense tensor and triggered a CUDA OOM, whereas the sparse representation peaks at 9.35 GiB; LEGCN then runs at 67.82%.
 - `ehnn_preprocessing()` adds `coauthor_dblp` to the list of datasets that skip the dense incidence expansion. Like `yelp` and `walmart-trips-100`, `coauthor_dblp` now stays on the sparse path and no longer builds the 41,302 x 63,665 dense matrix (which needed 9.80 GiB of contiguous host memory). The computed result is unchanged, and EHNN then runs at 90.37%.
 
 **`dhgbench/lib_yamls/node_yamls/config_hjrl.yaml`**
@@ -968,41 +784,9 @@ Besides adding the reproduction results, the `study_notes/` folder and this READ
 
 These YAML sections let the config loader return a valid configuration instead of raising an `AttributeError` from a missing key.
 
-## 7. Configuration Issues, Fixes and Remaining Problems
-
-### 7.1 Combinations with no YAML section provided
-
-The official YAML files do not ship a per-dataset section for the following **14 dataset x method combinations**. When such a combination is launched, `method_config()` looks up a key that does not exist; its bare `except` silently swallows the underlying KeyError and keeps the argparse parser defaults, so the run later aborts with an `AttributeError`.
-
-| Dataset | Methods without a YAML section | Count |
-| --- | --- | :---: |
-| Walmart-Trips-100 | SheafHyperGNN, DPHGNN, TMPHN | 3 |
-| Yelp | CEGAT, LEGCN, SheafHyperGNN, DPHGNN, HyperGT, TMPHN | 6 |
-| Trivago | CEGAT, PhenomNN, SheafHyperGNN, DPHGNN, TMPHN | 5 |
-| **Total** | | **14** |
-
-For HJRL and UniGCNII the missing sections were instead filled in (see Section 6), so those two methods run normally on every dataset.
-
-### 7.2 Problems encountered during reproduction
-
-The problems fell into four failure mechanisms plus a set of reproducible numerical discrepancies:
-
-1. **Missing YAML section (mechanism iii):** the 14 combinations above abort with an `AttributeError` because no per-dataset configuration is released.
-2. **GPU out-of-memory (mechanisms i and ii):** some combinations are already reported as OOM in the paper, while others have a paper score but exhaust the 22 GB VRAM locally (e.g. LEGCN on Trivago).
-3. **Host-memory OOM (mechanism iv):** a preprocessing step expands a sparse matrix into a dense CPU array that exceeds the available RAM — for example TMPHN on Walmart needs a 52.6 GiB array from `toarray()`, and HJRL/EHNN build very large dense incidence matrices.
-4. **Numerical discrepancies:** even when a run completes, some cells differ from the paper by a stable, reproducible margin rather than failing outright.
-
-### 7.3 How the problems were resolved
-
-The recoverable problems were fixed by changing the representation or the config loading, never the model definition:
-
-- **EHNN on Coauthor-DBLP:** `ehnn_preprocessing()` now treats `coauthor_dblp` like `yelp` and `walmart-trips-100`, routing it down the sparse path so the 41,302 x 63,665 dense incidence matrix (9.80 GiB of contiguous memory) is no longer built. The computed result is unchanged and EHNN runs at 90.37%.
-- **LEGCN on Walmart-Trips-100:** `line_expansion()` returns a transposed `SparseTensor` instead of the raw COO index, so `GCNConv` uses the sparse kernel and never materialises the 36.07 GiB dense adjacency; peak memory drops to 9.35 GiB and LEGCN runs at 67.82%.
-- **`legcn.py`:** every `GCNConv` is created with `add_self_loops=False` to avoid a duplicated self-loop in the line-expansion graph.
-- **`config_hjrl.yaml` / `config_unigin.yaml`:** the missing per-dataset sections were added (4 and 12 sections respectively), letting HJRL and UniGCNII load a valid configuration.
 - **DPHGNN on Pokec:** re-running across five seeds showed the gap comes from training instability (one seed's loss spikes and it lands at 44.37), not a systematic bias; the five-seed result is reported with its standard deviation.
 
-### 7.4 Remaining problems and likely causes
+### 5.4 Remaining problems and likely causes
 
 The 26 final failures and the stable numerical gaps were not force-fixed, because doing so would change the paper's settings. Their likely causes are:
 
@@ -1015,25 +799,28 @@ The 26 final failures and the stable numerical gaps were not force-fixed, becaus
 - **HyperGT/TMPHN low on Amazon (Ratings):** 86% of the nodes (19,175 of 22,299) are isolated and belong to no hyperedge, so these large models under-fit with no neighbours to aggregate; simpler deterministic models such as HGNN stay stable at about 28%.
 - **DPHGNN on Pokec:** the wide spread across seeds is training instability rather than a stable systematic bias.
 
-## 8. Citation
+## 6. Citation
 | **ID** | **Method** | **Paper** |     **Venue**     |  
 | :----: | :----: | :----: |:----: |  
-|1 | HGNN | [Hypergraph neural networks](https://cdn.aaai.org/ojs/4235/4235-13-7289-1-10-20190705.pdf) | AAAI 2019 | 
-|2|HyperGCN|[HyperGCN: A New Method of Training Graph Convolutional Networks on Hypergraphs](https://proceedings.neurips.cc/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf)|NeurIPS 2019| 
-|3| HNHN | [HNHN: Hypergraph Networks with Hyperedge Neurons](https://grlplus.github.io/papers/40.pdf) | ICML WS 2020 | 
-|4| HCHA | [Hypergraph convolution and hypergraph attention](https://www.sciencedirect.com/science/article/abs/pii/S0031320320304404?via=ihub) | PR 2020 | 
-|5| UniGNN | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://www.ijcai.org/proceedings/2021/0353.pdf) | IJCAI 2021 | 
-|6| AllSetformer | [You are AllSet: A Multiset Function Framework for Hypergraph Neural Networks](https://openreview.net/forum?id=hpBTIv2uy_E) | ICLR 2022 | 
-|7|HyperND|[Nonlinear Feature Diffusion on Hypergraphs](https://proceedings.mlr.press/v162/prokopchik22a/prokopchik22a.pdf)|ICML 2022|
-|8| EHNN|[Equivariant hypergraph neural networks](https://arxiv.org/pdf/2208.10428)|ECCV 2022|Y|Y|
-|9| LEGCN|[Semi-supervised Hypergraph Node Classification on Hypergraph Line Expansion](https://arxiv.org/pdf/2005.04843)|CIKM 2022|
-|10| ED-HNN | [Equivariant Hypergraph Diffusion Neural Operators](https://openreview.net/forum?id=RiTjKoscnNd) | ICLR 2023 | 
-|11|PhenomNN|[From Hypergraph Energy Functions to Hypergraph Neural Networks](https://proceedings.mlr.press/v202/wang23d/wang23d.pdf)|ICML 2023|
-|12|SheafHyperGNN|[Sheaf Hypergraph Networks](https://proceedings.neurips.cc/paper_files/paper/2023/file/27f243af2887d7f248f518d9b967a882-Paper-Conference.pdf)|NeurIPS 2023|
-|13|HJRL|[Hypergraph Joint Representation Learning for Hypervertices and Hyperedges via Cross Expansion](https://openreview.net/forum?id=fxLaL5s6UH)|AAAI 2024|
-|14| DPHGNN |[DPHGNN: A Dual Perspective Hypergraph Neural Networks](https://arxiv.org/pdf/2405.16616)|KDD 2024| 
-|15|T-HyperGNNs |[T-HyperGNNs: Hypergraph Neural Networks via Tensor Representations](https://ieeexplore.ieee.org/document/10462516)| TNNLS 2024|
-|16|HyperGT|[Hypergraph Transformer for Semi-Supervised Classification](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10446248)|ICASSP 2024|
-|17|TF-HNN |[Training-Free Message Passing for Learning on Hypergraphs](https://openreview.net/pdf?id=4AuyYxt7A2)| ICLR 2025|
+|1| MLP | Multilayer Perceptron (feature-only baseline) | — |
+|2| CEGCN | Clique-expansion GCN: [Semi-supervised Classification with Graph Convolutional Networks](https://arxiv.org/abs/1609.02907) | ICLR 2017 |
+|3| CEGAT | Clique-expansion GAT: [Graph Attention Networks](https://arxiv.org/abs/1710.10903) | ICLR 2018 |
+|4| HGNN | [Hypergraph neural networks](https://cdn.aaai.org/ojs/4235/4235-13-7289-1-10-20190705.pdf) | AAAI 2019 |
+|5| HyperGCN | [HyperGCN: A New Method of Training Graph Convolutional Networks on Hypergraphs](https://proceedings.neurips.cc/paper/2019/file/1efa39bcaec6f3900149160693694536-Paper.pdf) | NeurIPS 2019 |
+|6| HNHN | [HNHN: Hypergraph Networks with Hyperedge Neurons](https://grlplus.github.io/papers/40.pdf) | ICML WS 2020 |
+|7| HCHA | [Hypergraph convolution and hypergraph attention](https://www.sciencedirect.com/science/article/abs/pii/S0031320320304404?via=ihub) | PR 2020 |
+|8| UniGNN | [UniGNN: a Unified Framework for Graph and Hypergraph Neural Networks](https://www.ijcai.org/proceedings/2021/0353.pdf) | IJCAI 2021 |
+|9| AllSetformer | [You are AllSet: A Multiset Function Framework for Hypergraph Neural Networks](https://openreview.net/forum?id=hpBTIv2uy_E) | ICLR 2022 |
+|10| HyperND | [Nonlinear Feature Diffusion on Hypergraphs](https://proceedings.mlr.press/v162/prokopchik22a/prokopchik22a.pdf) | ICML 2022 |
+|11| EHNN | [Equivariant hypergraph neural networks](https://arxiv.org/pdf/2208.10428) | ECCV 2022 |
+|12| LEGCN | [Semi-supervised Hypergraph Node Classification on Hypergraph Line Expansion](https://arxiv.org/pdf/2005.04843) | CIKM 2022 |
+|13| ED-HNN | [Equivariant Hypergraph Diffusion Neural Operators](https://openreview.net/forum?id=RiTjKoscnNd) | ICLR 2023 |
+|14| PhenomNN | [From Hypergraph Energy Functions to Hypergraph Neural Networks](https://proceedings.mlr.press/v202/wang23d/wang23d.pdf) | ICML 2023 |
+|15| SheafHyperGNN | [Sheaf Hypergraph Networks](https://proceedings.neurips.cc/paper_files/paper/2023/file/27f243af2887d7f248f518d9b967a882-Paper-Conference.pdf) | NeurIPS 2023 |
+|16| HJRL | [Hypergraph Joint Representation Learning for Hypervertices and Hyperedges via Cross Expansion](https://openreview.net/forum?id=fxLaL5s6UH) | AAAI 2024 |
+|17| DPHGNN | [DPHGNN: A Dual Perspective Hypergraph Neural Networks](https://arxiv.org/pdf/2405.16616) | KDD 2024 |
+|18| T-HyperGNNs | [T-HyperGNNs: Hypergraph Neural Networks via Tensor Representations](https://ieeexplore.ieee.org/document/10462516) | TNNLS 2024 |
+|19| HyperGT | [Hypergraph Transformer for Semi-Supervised Classification](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10446248) | ICASSP 2024 |
+|20| TF-HNN | [Training-Free Message Passing for Learning on Hypergraphs](https://openreview.net/pdf?id=4AuyYxt7A2) | ICLR 2025 |
 
 ```
